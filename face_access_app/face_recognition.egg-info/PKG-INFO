@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: face-recognition
+Version: 0.1.0
+Summary: Face recognition enrollment and verification experiments
+Requires-Python: >=3.13
+Requires-Dist: deepface>=0.0.99
+Requires-Dist: matplotlib>=3.10.9
+Requires-Dist: numpy>=2.4.0
+Requires-Dist: opencv-python>=4.13.0.92
+Requires-Dist: retina-face>=0.0.17
+Requires-Dist: tf-keras>=2.21.0

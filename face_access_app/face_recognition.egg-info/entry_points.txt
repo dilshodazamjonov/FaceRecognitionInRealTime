@@ -1,0 +1,4 @@
+[console_scripts]
+face-enroll = enroll:main
+face-live = live_verifier:main
+face-verify = verifier:main
