@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Face recognition enrollment and verification experiments"
 requires-python = ">=3.13"
 dependencies = [
+    "matplotlib>=3.10.9",
     "numpy>=2.4.0",
     "opencv-python>=4.13.0.92",
 ]
