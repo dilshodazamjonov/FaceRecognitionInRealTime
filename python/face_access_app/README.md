@@ -26,18 +26,18 @@ The live result is effectively:
 
 ## Commands
 
-Run all commands from inside `face_access_app/`.
+Run all commands from inside `python/face_access_app/`.
 
 ```powershell
-cd .\face_access_app
+cd .\python\face_access_app
 ```
 
 ### 1. Enroll The Reference Image
 
-This reads the first supported image from `..\data\` and saves the enrolled reference.
+This reads the first supported image from `..\..\data\` and saves the enrolled reference.
 
 ```powershell
-uv run face-enroll
+uv run --project .. face-enroll
 ```
 
 By default, the saved file is:
@@ -51,7 +51,7 @@ By default, the saved file is:
 Verify a candidate image against the saved reference:
 
 ```powershell
-uv run face-verify --image ..\data\photo_2026-04-25_13-00-12.jpg
+uv run --project .. face-verify --image ..\..\data\photo_2026-04-25_13-00-12.jpg
 ```
 
 ### 3. Run Live Camera Verification
@@ -59,10 +59,16 @@ uv run face-verify --image ..\data\photo_2026-04-25_13-00-12.jpg
 Start webcam verification:
 
 ```powershell
-uv run face-live
+uv run --project .. face-live
 ```
 
 Press `q` to close the camera window.
+
+Smoother local example:
+
+```powershell
+uv run --project .. face-live --process-interval-ms 500 --max-inference-dimension 512
+```
 
 ## Commands From Repo Root
 
@@ -71,19 +77,55 @@ If you want to stay in the repo root, use `--project`.
 ### Enroll
 
 ```powershell
-uv run --project .\face_access_app face-enroll
+uv run --project .\python face-enroll
 ```
 
 ### Verify
 
 ```powershell
-uv run --project .\face_access_app face-verify --image .\data\photo_2026-04-25_13-00-12.jpg
+uv run --project .\python face-verify --image .\data\photo_2026-04-25_13-00-12.jpg
 ```
 
 ### Live Camera
 
 ```powershell
-uv run --project .\face_access_app face-live
+uv run --project .\python face-live
+```
+
+## Commands From Inside `python/`
+
+If your terminal is already in `D:\python projects\ForGF\python`, use `--project .` and remember the image path is one level up in `..\data\`.
+
+### Enroll
+
+```powershell
+uv run --project . face-enroll
+```
+
+### Verify
+
+```powershell
+uv run --project . face-verify --image ..\data\photo_2026-04-25_13-00-12.jpg
+```
+
+### Live Camera
+
+```powershell
+uv run --project . face-live
+```
+
+### Backend From Inside `python/`
+
+```powershell
+uv run --project . forgf-backend
+```
+
+Custom token and port example:
+
+```powershell
+$env:FORGF_ADMIN_TOKEN='my-secret-token'
+$env:FORGF_PORT='8001'
+uv run --project . forgf-backend
 ```
 
 ## Useful Options
@@ -91,49 +133,55 @@ uv run --project .\face_access_app face-live
 Enroll with an explicit image and label:
 
 ```powershell
-uv run --project .\face_access_app face-enroll --image .\data\photo_2026-04-25_13-00-12.jpg --label girlfriend
+uv run --project .\python face-enroll --image .\data\photo_2026-04-25_13-00-12.jpg --label girlfriend
 ```
 
 Enroll to a custom output file:
 
 ```powershell
-uv run --project .\face_access_app face-enroll --out .\face_access_app\references\my_reference.npz
+uv run --project .\python face-enroll --out .\python\face_access_app\references\my_reference.npz
 ```
 
 Verify using a custom reference file:
 
 ```powershell
-uv run --project .\face_access_app face-verify --image .\data\photo_2026-04-25_13-00-12.jpg --reference .\face_access_app\references\my_reference.npz
+uv run --project .\python face-verify --image .\data\photo_2026-04-25_13-00-12.jpg --reference .\python\face_access_app\references\my_reference.npz
 ```
 
 Override the threshold during verification:
 
 ```powershell
-uv run --project .\face_access_app face-verify --image .\data\photo_2026-04-25_13-00-12.jpg --threshold 0.68
+uv run --project .\python face-verify --image .\data\photo_2026-04-25_13-00-12.jpg --threshold 0.50
 ```
 
 Run live mode and exit once a stable match is found:
 
 ```powershell
-uv run --project .\face_access_app face-live --exit-on-match
+uv run --project .\python face-live --exit-on-match
 ```
 
 Use a different camera index:
 
 ```powershell
-uv run --project .\face_access_app face-live --camera-index 1
+uv run --project .\python face-live --camera-index 1
 ```
 
 Require more consecutive matching frames before `TRUE`:
 
 ```powershell
-uv run --project .\face_access_app face-live --required-consecutive-matches 5
+uv run --project .\python face-live --required-consecutive-matches 5
 ```
 
 Override the live threshold:
 
 ```powershell
-uv run --project .\face_access_app face-live --threshold 0.68
+uv run --project .\python face-live --threshold 0.50
+```
+
+Slow-machine tuning example:
+
+```powershell
+uv run --project .\python face-live --process-interval-ms 500 --max-inference-dimension 512
 ```
 
 ## Typical Flow
@@ -145,16 +193,16 @@ uv run --project .\face_access_app face-live --threshold 0.68
 Example:
 
 ```powershell
-uv run --project .\face_access_app face-enroll
-uv run --project .\face_access_app face-verify --image .\data\photo_2026-04-25_13-00-12.jpg
-uv run --project .\face_access_app face-live
+uv run --project .\python face-enroll
+uv run --project .\python face-verify --image .\data\photo_2026-04-25_13-00-12.jpg
+uv run --project .\python face-live
 ```
 
 ## Output Meaning
 
 During live verification:
 
-- `TRUE`: stable match confirmed
+- `TRUE`: stable match confirmed and ready to move to the wishes page
 - `MATCHING`: current frames are matching, but the required streak is not reached yet
 - `FALSE: unknown`: a face was found, but it is not the enrolled person
 - `NO FACE`: no face detected in the frame
@@ -166,3 +214,4 @@ During live verification:
 - Enrollment expects exactly one face in the reference image.
 - Verification expects exactly one face for a proper match decision.
 - The saved reference file stores the embedding plus metadata such as label, threshold, model, and detector backend.
+- Live verification is for local debugging; the real product path is browser camera -> backend `POST /verify`.

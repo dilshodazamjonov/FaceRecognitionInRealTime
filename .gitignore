@@ -1,5 +1,6 @@
 .env
 .venv/
+.venv_old_locked/
 __pycache__/
 *.pyc
 *.pyo
@@ -7,4 +8,5 @@ __pycache__/
 *.npy
 *.joblib
 *.log
+*.sqlite3
 *.jpg

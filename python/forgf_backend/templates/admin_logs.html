@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ForGF Admin Logs</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f6f2ea;
+            --paper: #fffdf8;
+            --ink: #1f1a17;
+            --muted: #7a6e65;
+            --line: #e4d9ca;
+            --accent: #c95f4a;
+            --good: #2f8f5b;
+            --warn: #d48a24;
+            --bad: #b4493d;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(201, 95, 74, 0.12), transparent 32%),
+                linear-gradient(180deg, #faf6ef 0%, var(--bg) 100%);
+            color: var(--ink);
+        }
+
+        .shell {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 12px 36px rgba(63, 44, 34, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 10px 24px rgba(63, 44, 34, 0.05);
+        }
+
+        .card .label {
+            color: var(--muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .card .value {
+            margin-top: 8px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .table-wrap {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 12px 36px rgba(63, 44, 34, 0.08);
+        }
+
+        .hero-actions,
+        .table-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .notice {
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(47, 143, 91, 0.22);
+            background: rgba(47, 143, 91, 0.08);
+            color: var(--good);
+            font-weight: 600;
+        }
+
+        .table-head {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .table-head h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .table-head span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 980px;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            vertical-align: top;
+            font-size: 14px;
+        }
+
+        th {
+            background: #fbf8f2;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-size: 12px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .pill.match {
+            color: white;
+            background: var(--good);
+        }
+
+        .pill.unknown {
+            color: white;
+            background: var(--bad);
+        }
+
+        .pill.no_face,
+        .pill.multiple_faces {
+            color: white;
+            background: var(--warn);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .action-form {
+            margin: 0;
+        }
+
+        .button {
+            appearance: none;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(63, 44, 34, 0.12);
+        }
+
+        .button.clear {
+            color: white;
+            background: var(--bad);
+        }
+
+        .button.delete {
+            color: var(--bad);
+            background: rgba(180, 73, 61, 0.08);
+            border-color: rgba(180, 73, 61, 0.22);
+            padding: 8px 12px;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 14px;
+            }
+
+            .hero {
+                padding: 18px;
+            }
+
+            .hero h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <section class="hero">
+            <h1>ForGF Access Logs</h1>
+            <p>Recent verification attempts, user IPs, browser/device hints, and face-match outcomes.</p>
+            {% if notice %}
+            <div class="notice">{{ notice }}</div>
+            {% endif %}
+        </section>
+
+        <section class="cards">
+            <div class="card">
+                <div class="label">Total Attempts</div>
+                <div class="value">{{ summary.total_attempts }}</div>
+            </div>
+            <div class="card">
+                <div class="label">Matches</div>
+                <div class="value">{{ summary.matches }}</div>
+            </div>
+            <div class="card">
+                <div class="label">Unknown</div>
+                <div class="value">{{ summary.unknown }}</div>
+            </div>
+            <div class="card">
+                <div class="label">No Face</div>
+                <div class="value">{{ summary.no_face }}</div>
+            </div>
+            <div class="card">
+                <div class="label">Multiple Faces</div>
+                <div class="value">{{ summary.multiple_faces }}</div>
+            </div>
+        </section>
+
+        <section class="table-wrap">
+            <div class="table-head">
+                <h2>Recent Attempts</h2>
+                <div class="table-actions">
+                    <span>Showing the latest {{ log_limit }} rows</span>
+                    {% if logs %}
+                    <form class="action-form" method="post" action="/admin/logs/clear" onsubmit="return confirm('Delete all stored log entries?');">
+                        <input type="hidden" name="token" value="{{ admin_token }}">
+                        <button class="button clear" type="submit">Delete All Logs</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Message</th>
+                            <th>IP</th>
+                            <th>Device</th>
+                            <th>OS</th>
+                            <th>Distance</th>
+                            <th>Threshold</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td>
+                                <div>{{ log.created_at }}</div>
+                            </td>
+                            <td>
+                                <span class="pill {{ log.status }}">{{ log.status }}</span>
+                            </td>
+                            <td>{{ log.message }}</td>
+                            <td>{{ log.ip_address }}</td>
+                            <td>
+                                <div>{{ log.device_name }}</div>
+                                <div class="muted">{{ log.browser_name }}</div>
+                            </td>
+                            <td>{{ log.os_name }}</td>
+                            <td>{{ "%.4f"|format(log.distance) if log.distance is not none else "-" }}</td>
+                            <td>{{ "%.4f"|format(log.threshold) if log.threshold is not none else "-" }}</td>
+                            <td>
+                                <form class="action-form" method="post" action="/admin/logs/{{ log.id }}/delete" onsubmit="return confirm('Delete this log entry?');">
+                                    <input type="hidden" name="token" value="{{ admin_token }}">
+                                    <button class="button delete" type="submit">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="muted">No verification logs yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

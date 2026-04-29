@@ -4,14 +4,23 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import time
 
 import cv2
 
 try:
-    from .face_pipeline import verify_frame_against_reference
+    from .face_pipeline import (
+        DEFAULT_MAX_INFERENCE_DIMENSION,
+        DEFAULT_REQUIRED_CONSECUTIVE_MATCHES,
+        verify_frame_against_reference,
+    )
     from .storage import get_default_reference_path, load_reference
 except ImportError:  # pragma: no cover - supports direct script execution
-    from face_pipeline import verify_frame_against_reference
+    from face_pipeline import (
+        DEFAULT_MAX_INFERENCE_DIMENSION,
+        DEFAULT_REQUIRED_CONSECUTIVE_MATCHES,
+        verify_frame_against_reference,
+    )
     from storage import get_default_reference_path, load_reference
 
 
@@ -30,7 +39,7 @@ def _draw_boxes(frame, boxes, color):
 
 def _build_status_text(result, stable_match: bool, match_streak: int, required_streak: int) -> str:
     if result.status == "match":
-        status_label = "TRUE" if stable_match else "MATCHING"
+        status_label = "TRUE -> WISHES" if stable_match else "MATCHING"
         return (
             f"{status_label}: {result.label} "
             f"({result.distance:.4f} <= {result.threshold:.4f}) "
@@ -38,15 +47,12 @@ def _build_status_text(result, stable_match: bool, match_streak: int, required_s
         )
 
     if result.status == "unknown":
-        return (
-            f"FALSE: unknown "
-            f"({result.distance:.4f} > {result.threshold:.4f})"
-        )
+        return f"FALSE: {result.message} ({result.distance:.4f} > {result.threshold:.4f})"
 
     if result.status == "multiple_faces":
-        return "MULTIPLE FACES"
+        return result.message or "MULTIPLE FACES"
 
-    return "NO FACE"
+    return result.message or "NO FACE"
 
 
 def run_live_verification(
@@ -55,16 +61,21 @@ def run_live_verification(
     threshold: float | None = None,
     required_consecutive_matches: int = 3,
     exit_on_match: bool = False,
+    process_interval_ms: int = 300,
+    max_inference_dimension: int = DEFAULT_MAX_INFERENCE_DIMENSION,
 ) -> bool:
     """Run the live camera loop and return whether a stable match was seen."""
 
     reference_data = load_reference(reference_path)
     camera = cv2.VideoCapture(camera_index)
+    camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     if not camera.isOpened():
         raise RuntimeError(f"Failed to open camera index {camera_index}.")
 
     match_streak = 0
     saw_stable_match = False
+    last_processed_at = 0.0
+    last_result = None
 
     try:
         while True:
@@ -72,11 +83,23 @@ def run_live_verification(
             if not ok:
                 raise RuntimeError("Failed to read a frame from the camera.")
 
-            result = verify_frame_against_reference(
-                frame=frame,
-                reference_data=reference_data,
-                threshold=threshold,
+            now = time.perf_counter()
+            should_process = (
+                last_result is None
+                or process_interval_ms <= 0
+                or (now - last_processed_at) * 1000.0 >= process_interval_ms
             )
+
+            if should_process:
+                last_result = verify_frame_against_reference(
+                    frame=frame,
+                    reference_data=reference_data,
+                    threshold=threshold,
+                    max_dimension=max_inference_dimension,
+                )
+                last_processed_at = now
+
+            result = last_result
 
             if result.matched:
                 match_streak += 1
@@ -137,8 +160,20 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--required-consecutive-matches",
         type=int,
-        default=3,
+        default=DEFAULT_REQUIRED_CONSECUTIVE_MATCHES,
         help="Frames required before a match is treated as stable true.",
+    )
+    parser.add_argument(
+        "--process-interval-ms",
+        type=int,
+        default=300,
+        help="Minimum milliseconds between expensive verification passes.",
+    )
+    parser.add_argument(
+        "--max-inference-dimension",
+        type=int,
+        default=DEFAULT_MAX_INFERENCE_DIMENSION,
+        help="Resize frames so the largest side is at most this value before inference.",
     )
     parser.add_argument(
         "--exit-on-match",
@@ -158,6 +193,8 @@ def main() -> int:
         threshold=args.threshold,
         required_consecutive_matches=max(1, args.required_consecutive_matches),
         exit_on_match=args.exit_on_match,
+        process_interval_ms=max(0, args.process_interval_ms),
+        max_inference_dimension=max(0, args.max_inference_dimension),
     )
     print({"matched": matched})
     return 0 if matched else 1
@@ -165,4 +202,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
