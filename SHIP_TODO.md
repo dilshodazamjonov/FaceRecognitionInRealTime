@@ -25,7 +25,7 @@ Current run commands:
 
 ```powershell
 uv run --project .\python face-enroll
-uv run --project .\python face-verify --image .\data\photo_2026-04-25_13-00-12.jpg
+uv run --project .\python face-verify --image ..\data\photo_2026-04-25_13-00-12.jpg
 uv run --project .\python face-live
 uv run --project .\python forgf-backend
 ```
@@ -75,7 +75,7 @@ uv run --project .\python forgf-backend
   - `GET /reference`
   - `POST /enroll`
   - `POST /verify`
-  - `GET /admin/logs`
+  - `GET /admin/logs?token=your-token`
 - Backend validates uploaded images and returns structured API errors.
 - Backend calls the shared face engine instead of duplicating recognition logic.
 - Reference loading is cached in memory.

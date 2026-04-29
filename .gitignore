@@ -1,4 +1,3 @@
-.env
 .venv/
 .venv_old_locked/
 __pycache__/
