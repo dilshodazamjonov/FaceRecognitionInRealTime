@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#2a1715">
+    <title>ForGF</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app" id="app">
+      <section class="screen screen-intro is-active" id="intro-screen" aria-labelledby="intro-title">
+        <div class="ambient-frame" aria-hidden="true"></div>
+        <div class="intro-copy">
+          <p class="eyebrow">a little secret</p>
+          <h1 id="intro-title">Hi love. Come closer.</h1>
+          <p class="lead">I made this page just for you. Let the camera see you for a second.</p>
+        </div>
+        <div class="intro-actions">
+          <button class="primary-action" id="start-button" type="button">
+            <span>Open it</span>
+            <span class="action-mark" aria-hidden="true">-></span>
+          </button>
+          <p class="fine-print">It only asks for the camera after you tap.</p>
+        </div>
+      </section>
+
+      <section class="screen screen-camera" id="camera-screen" aria-labelledby="camera-title">
+        <div class="botanical-field" aria-hidden="true">
+          <svg class="sprig sprig-left" viewBox="0 0 220 520" role="img">
+            <path class="vine" d="M109 505 C76 431 151 382 113 310 C83 252 129 206 103 151 C82 105 110 64 137 24" />
+            <path class="leaf leaf-a" d="M93 420 C38 390 30 334 91 338 C128 342 136 390 93 420Z" />
+            <path class="leaf leaf-b" d="M124 360 C178 330 194 281 134 280 C97 280 84 330 124 360Z" />
+            <path class="leaf leaf-c" d="M88 260 C32 231 34 175 92 184 C127 189 131 237 88 260Z" />
+            <path class="leaf leaf-d" d="M123 196 C178 165 185 110 126 119 C91 125 82 173 123 196Z" />
+            <path class="flower" d="M145 88 C124 76 124 48 148 54 C154 29 183 30 180 57 C206 51 218 77 194 92 C211 114 191 135 171 117 C152 139 127 122 144 99Z" />
+          </svg>
+          <svg class="sprig sprig-right" viewBox="0 0 240 540" role="img">
+            <path class="vine" d="M120 520 C174 456 99 398 141 329 C178 270 129 221 158 163 C184 111 143 67 113 24" />
+            <path class="leaf leaf-a" d="M139 430 C194 395 198 335 137 345 C99 351 95 402 139 430Z" />
+            <path class="leaf leaf-b" d="M102 364 C45 337 28 279 91 283 C131 286 144 336 102 364Z" />
+            <path class="leaf leaf-c" d="M154 262 C208 229 202 173 145 188 C111 197 112 244 154 262Z" />
+            <path class="leaf leaf-d" d="M111 200 C55 170 51 111 111 124 C146 132 151 179 111 200Z" />
+            <path class="flower" d="M86 90 C64 78 67 49 90 56 C99 30 127 35 120 62 C147 59 157 87 131 99 C145 123 120 140 103 118 C81 137 59 117 78 96Z" />
+          </svg>
+          <svg class="sprig sprig-bottom" viewBox="0 0 680 180" role="img">
+            <path class="vine" d="M20 142 C132 72 232 177 343 96 C444 22 548 76 662 32" />
+            <path class="leaf leaf-a" d="M139 104 C113 48 157 17 187 67 C205 101 170 134 139 104Z" />
+            <path class="leaf leaf-b" d="M265 124 C245 63 296 40 318 96 C332 133 288 156 265 124Z" />
+            <path class="leaf leaf-c" d="M422 77 C449 20 503 35 477 90 C460 126 414 115 422 77Z" />
+            <path class="leaf leaf-d" d="M556 64 C589 12 637 38 603 88 C580 121 540 101 556 64Z" />
+            <path class="flower" d="M344 80 C325 67 330 42 351 50 C361 27 384 35 375 58 C400 57 407 83 383 92 C396 114 372 128 357 108 C337 124 318 104 337 87Z" />
+          </svg>
+        </div>
+        <div class="camera-stage" data-verification-state="idle">
+          <video id="camera-video" class="camera-video" autoplay playsinline muted></video>
+          <canvas id="capture-canvas" class="capture-canvas" aria-hidden="true"></canvas>
+
+          <div class="camera-vignette" aria-hidden="true"></div>
+          <div class="focus-frame" aria-hidden="true">
+            <span class="corner corner-tl"></span>
+            <span class="corner corner-tr"></span>
+            <span class="corner corner-bl"></span>
+            <span class="corner corner-br"></span>
+          </div>
+
+          <div class="camera-topline">
+            <button class="ghost-action" id="stop-button" type="button">Close</button>
+            <span class="status-chip" id="status-chip">Waiting</span>
+          </div>
+
+          <div class="camera-guidance">
+            <p class="eyebrow" id="camera-kicker">just checking</p>
+            <h2 id="camera-title">Stay in the little frame.</h2>
+            <p id="status-message">Opening the camera.</p>
+            <div class="stability" aria-label="Match stability">
+              <span class="stability-dot" data-dot="1"></span>
+              <span class="stability-dot" data-dot="2"></span>
+              <span class="stability-dot" data-dot="3"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen screen-blocked" id="blocked-screen" aria-labelledby="blocked-title">
+        <div class="blocked-panel">
+          <p class="eyebrow">not yet</p>
+          <h2 id="blocked-title">I could not tell it was you.</h2>
+          <p id="blocked-message">Try again with only your face in the frame and a bit more light.</p>
+          <button class="secondary-action" id="retry-button" type="button">Try again</button>
+        </div>
+      </section>
+
+      <section class="screen screen-wishes" id="wishes-screen" aria-labelledby="wishes-title">
+        <div class="wishes-backdrop" aria-hidden="true"></div>
+        <article class="wishes-letter">
+          <p class="eyebrow">there you are</p>
+          <h2 id="wishes-title">This part is yours.</h2>
+          <p>
+            I wanted this to feel like a small door that only opens for you.
+          </p>
+          <p>
+            The real wishes can go here next: a letter, a few memories, or anything you want her to find.
+          </p>
+          <button class="secondary-action" id="again-button" type="button">Back to start</button>
+        </article>
+      </section>
+    </main>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
