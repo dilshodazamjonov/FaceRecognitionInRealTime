@@ -24,6 +24,22 @@ $env:FORGF_PORT='8001'
 uv run --project . forgf-backend
 ```
 
+## Environment File
+
+The backend auto-loads `python/.env` when it builds config.
+
+Recommended setup:
+
+- put real local values in `python/.env`
+- keep `python/.env.example` as the tracked placeholder template
+- keep the keys aligned between both files
+
+Bootstrap command:
+
+```powershell
+Copy-Item .\python\.env.example .\python\.env
+```
+
 ## Endpoints
 
 - `GET /health`
@@ -42,7 +58,7 @@ Open:
 http://127.0.0.1:8000/admin/logs?token=change-me-admin-token
 ```
 
-Use `python/.env.example` to configure the admin token and backend settings.
+Use `python/.env` for real local settings and `python/.env.example` as the template.
 
 With the custom token and port example above, open:
 

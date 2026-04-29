@@ -36,6 +36,22 @@ $env:FORGF_PORT='8001'
 uv run --project . forgf-backend
 ```
 
+## Environment File
+
+The backend reads `python/.env` automatically on startup.
+
+Recommended setup:
+
+- keep real local values in `python/.env`
+- keep safe placeholder values in `python/.env.example`
+- keep the same keys in both files
+
+To create your local file for the first time:
+
+```powershell
+Copy-Item .\python\.env.example .\python\.env
+```
+
 ## Admin Logs
 
 Backend logs only come from requests that hit `POST /verify`.
@@ -58,4 +74,5 @@ The admin view currently supports:
 
 - Only one Python environment is used now: `python/.venv`
 - The backend imports `face_access_app` directly from this shared workspace
-- Backend environment variables live in `python/.env.example`
+- `python/.env.example` is the tracked template
+- `python/.env` is the real local config file loaded by the backend

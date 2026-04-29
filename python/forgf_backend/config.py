@@ -10,6 +10,34 @@ from pathlib import Path
 from .runtime import PYTHON_ROOT
 
 
+ENV_FILE_PATH = PYTHON_ROOT / ".env"
+
+
+def _strip_wrapping_quotes(value: str) -> str:
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    return value
+
+
+def load_local_env_file(env_path: Path = ENV_FILE_PATH) -> None:
+    """Load simple KEY=VALUE entries from python/.env into process env vars."""
+
+    if not env_path.exists():
+        return
+
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+
+        key, value = line.split("=", 1)
+        normalized_key = key.strip()
+        if not normalized_key or normalized_key in os.environ:
+            continue
+
+        os.environ[normalized_key] = _strip_wrapping_quotes(value.strip())
+
+
 def _parse_bool(raw_value: str | None, default: bool) -> bool:
     if raw_value is None:
         return default
@@ -41,6 +69,7 @@ class AppConfig:
 
 @lru_cache(maxsize=1)
 def get_config() -> AppConfig:
+    load_local_env_file()
     max_upload_mb = int(os.getenv("FORGF_MAX_UPLOAD_MB", "5"))
     reference_path_raw = os.getenv("FORGF_REFERENCE_PATH")
     reference_path = (
