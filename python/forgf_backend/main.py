@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import sys
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -25,6 +27,21 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
 )
 
+if sys.platform == "win32" and hasattr(asyncio, "WindowsSelectorEventLoopPolicy"):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+
+class _IgnoreWindowsConnectionReset(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        if record.exc_info:
+            error = record.exc_info[1]
+            if isinstance(error, ConnectionResetError) and getattr(error, "winerror", None) == 10054:
+                return False
+        return True
+
+
+logging.getLogger("asyncio").addFilter(_IgnoreWindowsConnectionReset())
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -41,6 +58,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(config.allowed_origins),
+        allow_origin_regex=r"https?://.*",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

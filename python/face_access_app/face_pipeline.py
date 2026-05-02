@@ -381,8 +381,12 @@ def verify_candidate_embedding(
         distance=distance,
         threshold=active_threshold,
         boxes=[],
-        message="Welcome to the wishes page." if matched else "Girl not found.",
-        next_screen=MATCH_SCREEN if matched else FAIL_SCREEN,
+        message=(
+            "Face matched enrolled reference."
+            if matched
+            else "Face did not match enrolled reference."
+        ),
+        next_screen=MATCH_SCREEN if matched else CAMERA_SCREEN,
         should_redirect=matched,
     )
 
@@ -462,14 +466,14 @@ def verify_frame_against_reference(
             )
         except FacePipelineError:
             return VerificationResult(
-                status="no_face",
+                status="unknown",
                 matched=False,
                 access_granted=False,
                 label=reference_data.label,
                 face_count=1,
                 threshold=float(threshold if threshold is not None else reference_data.threshold),
                 boxes=boxes,
-                message="Face detected but not stable enough. Hold still and try again.",
+                message="Face detected, but verification was unstable.",
                 next_screen=CAMERA_SCREEN,
                 should_redirect=False,
             )

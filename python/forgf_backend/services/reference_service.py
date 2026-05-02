@@ -17,7 +17,12 @@ from face_access_app.face_pipeline import (  # noqa: E402
     DEFAULT_MATCH_THRESHOLD,
     resize_image_for_inference,
 )
-from face_access_app.storage import StorageError, load_reference  # noqa: E402
+from face_access_app.storage import (  # noqa: E402
+    StorageError,
+    build_labeled_reference_path,
+    load_reference,
+    normalize_match_threshold,
+)
 
 _REFERENCE_CACHE: dict[str, object] = {
     "path": None,
@@ -84,21 +89,25 @@ def enroll_reference_image(
     source_name: str,
     label: str,
     threshold: float | None,
-) -> Path:
-    active_threshold = float(threshold if threshold is not None else DEFAULT_MATCH_THRESHOLD)
+) -> tuple[Path, Path]:
+    raw_threshold = float(threshold if threshold is not None else DEFAULT_MATCH_THRESHOLD)
+    active_threshold = normalize_match_threshold(raw_threshold)
     resized_image, _ = resize_image_for_inference(
         image,
         max_dimension=config.max_inference_dimension,
     )
+    labeled_reference_path = build_labeled_reference_path(label)
 
     try:
-        return enroll_reference_from_image_source(
+        active_reference_path = enroll_reference_from_image_source(
             image_source=resized_image,
             source_image_path=source_name,
             label=label,
             output_path=config.reference_path,
             threshold=active_threshold,
+            archive_output_path=labeled_reference_path,
         )
+        return active_reference_path, labeled_reference_path
     except FileNotFoundError as exc:
         raise ApiError(400, "image_not_found", str(exc)) from exc
     except Exception as exc:

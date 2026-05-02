@@ -38,6 +38,10 @@ body {
   color: var(--ink);
 }
 
+body.camera-page {
+  overflow: auto;
+}
+
 button {
   font: inherit;
 }
@@ -46,6 +50,41 @@ button {
   min-height: 100svh;
   position: relative;
   isolation: isolate;
+}
+
+.status-dock {
+  position: fixed;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 4;
+  width: min(100%, 520px);
+  padding: 14px 16px;
+  border: 1px solid rgba(74, 23, 25, 0.12);
+  border-radius: 20px;
+  background: rgba(255, 249, 239, 0.82);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 44px rgba(36, 24, 24, 0.12);
+}
+
+.status-dock-kicker,
+.status-dock-text {
+  margin: 0;
+}
+
+.status-dock-kicker {
+  color: var(--wine);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.status-dock-text {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
 }
 
 .screen {
@@ -65,8 +104,9 @@ button {
 }
 
 .screen-intro {
-  align-content: space-between;
+  place-items: center;
   padding: clamp(28px, 5vw, 64px);
+  overflow: hidden;
 }
 
 .ambient-frame {
@@ -85,9 +125,42 @@ button {
   border-bottom: 1px solid rgba(125, 47, 47, 0.12);
 }
 
+.intro-halo {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.intro-halo-left {
+  left: -120px;
+  top: 10%;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(201, 139, 131, 0.28), transparent 70%);
+}
+
+.intro-halo-right {
+  right: -140px;
+  bottom: -30px;
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(197, 161, 92, 0.18), transparent 68%);
+}
+
+.intro-stage {
+  position: relative;
+  z-index: 1;
+  width: min(1100px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 360px);
+  gap: clamp(24px, 5vw, 64px);
+  align-items: end;
+}
+
 .intro-copy {
   max-width: 760px;
-  padding-top: clamp(52px, 12vh, 120px);
+  padding-top: clamp(12px, 5vh, 56px);
 }
 
 .eyebrow {
@@ -121,12 +194,57 @@ h1 {
   line-height: 1.65;
 }
 
+.intro-note {
+  position: relative;
+  align-self: center;
+  padding: 28px 24px 24px;
+  border: 1px solid rgba(74, 23, 25, 0.14);
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 251, 246, 0.84), rgba(255, 247, 239, 0.76));
+  box-shadow:
+    0 18px 44px rgba(36, 24, 24, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.52);
+}
+
+.intro-note::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 22px;
+  border: 1px solid rgba(125, 47, 47, 0.08);
+}
+
+.note-kicker {
+  position: relative;
+  margin: 0 0 18px;
+  color: var(--wine);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.note-line {
+  position: relative;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(1.3rem, 2.8vw, 1.7rem);
+  line-height: 1.12;
+  color: var(--espresso);
+}
+
+.note-line + .note-line {
+  margin-top: 10px;
+}
+
 .intro-actions {
+  position: relative;
   display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 24px;
-  z-index: 1;
+  margin-top: 26px;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .primary-action,
@@ -181,22 +299,40 @@ h1 {
 }
 
 .fine-print {
-  max-width: 260px;
+  max-width: 280px;
   margin: 0;
   color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.5;
-  text-align: right;
+  text-align: left;
 }
 
 .screen-camera {
   place-items: center;
   overflow: hidden;
-  padding: 18px;
+  padding: 92px 18px 28px;
   background:
     linear-gradient(140deg, rgba(93, 121, 92, 0.2), transparent 32%),
     linear-gradient(220deg, rgba(201, 139, 131, 0.26), transparent 40%),
     linear-gradient(180deg, var(--ivory) 0%, var(--linen) 48%, #d9b7ae 100%);
+}
+
+.camera-page .screen-camera {
+  position: relative;
+  min-height: 100svh;
+}
+
+.camera-app .status-dock {
+  top: 18px;
+  bottom: auto;
+}
+
+.camera-shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
 }
 
 .botanical-field {
@@ -259,8 +395,8 @@ h1 {
 .camera-stage {
   position: relative;
   width: min(92vw, 430px);
-  height: min(70svh, 560px);
-  min-height: 430px;
+  height: min(64svh, 540px);
+  min-height: 390px;
   overflow: hidden;
   background: #0d0908;
   border: 1px solid rgba(74, 23, 25, 0.2);
@@ -289,6 +425,45 @@ h1 {
   display: none;
 }
 
+.face-hint-box {
+  position: absolute;
+  border: 2px solid rgba(248, 241, 230, 0.78);
+  border-radius: 26px;
+  box-shadow: 0 0 0 1px rgba(21, 15, 13, 0.18);
+  background: rgba(248, 241, 230, 0.05);
+  pointer-events: none;
+  z-index: 1;
+  transition:
+    opacity 180ms ease,
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.face-hint-box.is-hidden {
+  opacity: 0;
+}
+
+.camera-stage[data-face-guide="aligned"] .face-hint-box {
+  border-color: rgba(197, 161, 92, 0.96);
+  background: rgba(197, 161, 92, 0.09);
+  box-shadow: 0 0 22px rgba(197, 161, 92, 0.18);
+}
+
+.camera-stage[data-face-guide="off_center"] .face-hint-box,
+.camera-stage[data-face-guide="too_far"] .face-hint-box,
+.camera-stage[data-face-guide="too_close"] .face-hint-box {
+  border-color: rgba(248, 241, 230, 0.88);
+  background: rgba(248, 241, 230, 0.06);
+}
+
+.camera-stage[data-face-guide="mismatch"] .face-hint-box,
+.camera-stage[data-face-guide="multiple"] .face-hint-box {
+  border-color: rgba(201, 139, 131, 0.96);
+  background: rgba(201, 139, 131, 0.08);
+}
+
 .camera-vignette {
   position: absolute;
   inset: 0;
@@ -296,6 +471,18 @@ h1 {
     linear-gradient(180deg, rgba(13, 9, 8, 0.42), transparent 28%, transparent 58%, rgba(13, 9, 8, 0.82)),
     radial-gradient(ellipse at center, transparent 42%, rgba(13, 9, 8, 0.5) 100%);
   pointer-events: none;
+}
+
+.success-wash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(197, 161, 92, 0.34), transparent 34%),
+    linear-gradient(180deg, rgba(197, 161, 92, 0.12), rgba(248, 241, 230, 0.04));
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 260ms ease;
 }
 
 .focus-frame {
@@ -348,6 +535,16 @@ h1 {
   border-color: rgba(197, 161, 92, 0.95);
   filter: drop-shadow(0 0 18px rgba(197, 161, 92, 0.5));
   transform: scale(1.04);
+}
+
+.camera-stage[data-verification-state="revealed"] .corner {
+  border-color: rgba(197, 161, 92, 0.98);
+  filter: drop-shadow(0 0 28px rgba(197, 161, 92, 0.58));
+  transform: scale(1.06);
+}
+
+.camera-stage[data-verification-state="revealed"] .success-wash {
+  opacity: 1;
 }
 
 .camera-stage[data-verification-state="unknown"] .corner,
@@ -428,6 +625,27 @@ h1 {
   transform: scaleY(1.4);
 }
 
+.camera-continue-action {
+  position: sticky;
+  bottom: 16px;
+  z-index: 3;
+  width: min(92vw, 430px);
+  justify-content: center;
+  box-shadow: 0 16px 40px rgba(36, 24, 24, 0.16);
+}
+
+.camera-continue-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+  transform: none;
+  background: rgba(36, 24, 24, 0.18);
+  color: rgba(36, 24, 24, 0.68);
+}
+
+.camera-continue-action:disabled .action-mark {
+  color: rgba(125, 47, 47, 0.36);
+}
+
 .screen-blocked,
 .screen-wishes {
   place-items: center;
@@ -470,6 +688,7 @@ h1 {
 .screen-wishes {
   overflow: hidden;
   background:
+    radial-gradient(circle at 50% 18%, rgba(211, 173, 116, 0.18), transparent 24%),
     linear-gradient(120deg, rgba(21, 15, 13, 0.9), rgba(74, 23, 25, 0.78)),
     linear-gradient(180deg, #271615, #100b0a);
   color: var(--ivory);
@@ -497,6 +716,27 @@ h1 {
   color: var(--gold);
 }
 
+.success-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.success-mark::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: rgba(197, 161, 92, 0.42);
+}
+
+.success-name {
+  margin-top: 18px;
+  font-family: var(--serif);
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  line-height: 1.2;
+  color: rgba(248, 241, 230, 0.92);
+}
+
 .wishes-letter p:not(.eyebrow) {
   max-width: 620px;
   color: rgba(248, 241, 230, 0.76);
@@ -515,16 +755,20 @@ h1 {
   }
 
   .screen-camera {
-    padding: 42px;
+    padding: 108px 42px 38px;
   }
 
   .camera-stage {
     width: min(68vw, 640px);
-    height: min(70svh, 760px);
-    min-height: 580px;
+    height: min(64svh, 700px);
+    min-height: 520px;
     box-shadow:
       0 30px 86px rgba(36, 24, 24, 0.26),
       0 0 0 12px rgba(248, 241, 230, 0.25);
+  }
+
+  .camera-continue-action {
+    width: min(68vw, 640px);
   }
 
   .camera-guidance {
@@ -573,16 +817,20 @@ h1 {
   }
 
   .screen-camera {
-    padding: 52px;
+    padding: 110px 52px 42px;
   }
 
   .camera-stage {
     width: min(44vw, 720px);
-    height: min(72svh, 640px);
-    min-height: 560px;
+    height: min(62svh, 620px);
+    min-height: 520px;
     box-shadow:
       0 34px 96px rgba(36, 24, 24, 0.28),
       0 0 0 14px rgba(248, 241, 230, 0.26);
+  }
+
+  .camera-continue-action {
+    width: min(44vw, 720px);
   }
 
   .camera-guidance {
@@ -635,9 +883,9 @@ h1 {
     padding: 24px;
   }
 
-  .intro-actions {
-    align-items: stretch;
-    flex-direction: column;
+  .intro-stage {
+    grid-template-columns: 1fr;
+    align-items: start;
   }
 
   .primary-action {
@@ -655,13 +903,13 @@ h1 {
   }
 
   .screen-camera {
-    padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+    padding: max(86px, env(safe-area-inset-top)) 18px max(24px, env(safe-area-inset-bottom));
   }
 
   .camera-stage {
     width: min(92vw, 430px);
-    height: min(68svh, 560px);
-    min-height: 430px;
+    height: min(60svh, 520px);
+    min-height: 380px;
     box-shadow:
       0 24px 70px rgba(36, 24, 24, 0.26),
       0 0 0 8px rgba(248, 241, 230, 0.24);
@@ -688,8 +936,12 @@ h1 {
 @media (min-width: 390px) and (max-width: 430px) and (max-height: 932px) {
   .camera-stage {
     width: 354px;
-    height: 574px;
-    min-height: 574px;
+    height: 500px;
+    min-height: 500px;
+  }
+
+  .camera-continue-action {
+    width: 354px;
   }
 
   .focus-frame {
@@ -710,6 +962,17 @@ h1 {
   .sprig-bottom {
     bottom: -48px;
     width: 680px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .intro-stage {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .intro-note {
+    max-width: 420px;
   }
 }
 

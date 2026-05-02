@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#231312">
+    <title>ForGF | Passed</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ivory: #f8f1e6;
+        --gold: #d7b27a;
+        --rose: #d8a39b;
+        --wine: #7d2f2f;
+        --ink: #120c0b;
+        --night: #1b1111;
+        --night-soft: #2a1718;
+        --line: rgba(248, 241, 230, 0.18);
+        --glow: 0 24px 70px rgba(0, 0, 0, 0.28);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { min-height: 100%; }
+
+      body {
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        font-family: "Trebuchet MS", "Avenir Next", Verdana, sans-serif;
+        color: var(--ivory);
+        background:
+          radial-gradient(circle at 50% 18%, rgba(215, 178, 122, 0.2), transparent 20%),
+          radial-gradient(circle at 18% 20%, rgba(216, 163, 155, 0.12), transparent 24%),
+          linear-gradient(135deg, #140d0d 0%, #2a1718 52%, #120b0b 100%);
+      }
+
+      .frame {
+        position: fixed;
+        inset: 18px;
+        border: 1px solid rgba(248, 241, 230, 0.12);
+        pointer-events: none;
+      }
+
+      .frame::before {
+        content: "";
+        position: absolute;
+        inset: 14px;
+        border: 1px solid rgba(215, 178, 122, 0.16);
+      }
+
+      .card {
+        position: relative;
+        width: min(100%, 820px);
+        padding: clamp(32px, 7vw, 64px);
+        border-radius: 32px;
+        border: 1px solid var(--line);
+        background:
+          linear-gradient(180deg, rgba(248, 241, 230, 0.06), rgba(248, 241, 230, 0.03));
+        box-shadow: var(--glow);
+        overflow: hidden;
+      }
+
+      .card::after {
+        content: "";
+        position: absolute;
+        right: -60px;
+        top: -60px;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(215, 178, 122, 0.16), transparent 70%);
+        pointer-events: none;
+      }
+
+      .eyebrow {
+        margin: 0 0 18px;
+        color: var(--gold);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 760px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2.8rem, 8vw, 5.8rem);
+        line-height: 0.96;
+        font-weight: 500;
+      }
+
+      .name {
+        margin: 24px 0 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(1.45rem, 3.2vw, 2.2rem);
+        line-height: 1.18;
+        color: rgba(248, 241, 230, 0.94);
+      }
+
+      .message {
+        max-width: 620px;
+        margin: 18px 0 0;
+        color: rgba(248, 241, 230, 0.78);
+        font-size: clamp(1rem, 2vw, 1.15rem);
+        line-height: 1.8;
+      }
+
+      .actions {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+      }
+
+      .button {
+        min-height: 48px;
+        padding: 14px 20px;
+        border: 0;
+        border-radius: 999px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+      }
+
+      .button.primary {
+        background: var(--ivory);
+        color: var(--ink);
+      }
+
+      .button.ghost {
+        background: rgba(248, 241, 230, 0.08);
+        color: var(--ivory);
+        border: 1px solid rgba(248, 241, 230, 0.18);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame" aria-hidden="true"></div>
+    <main class="card">
+      <p class="eyebrow">Passed</p>
+      <h1>Congratulations, you passed.</h1>
+      <p class="name" id="success-name">Love, this one was always yours.</p>
+      <p class="message" id="success-message">The camera said yes, and this little hidden corner opened exactly the way it was supposed to.</p>
+      <div class="actions">
+        <button class="button primary" id="back-button" type="button">Back to start</button>
+        <button class="button ghost" id="stay-button" type="button">Stay here</button>
+      </div>
+    </main>
+
+    <script>
+      const OUTCOME_STORAGE_KEY = "forgfLastOutcome";
+
+      function prettifyLabel(label) {
+        if (!label) {
+          return "Love";
+        }
+
+        return label
+          .replace(/[_-]+/g, " ")
+          .trim()
+          .split(/\s+/)
+          .filter(Boolean)
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(" ");
+      }
+
+      try {
+        const raw = window.sessionStorage.getItem(OUTCOME_STORAGE_KEY);
+        if (raw) {
+          const payload = JSON.parse(raw);
+          if (payload && payload.type === "success") {
+            document.getElementById("success-name").textContent = `${prettifyLabel(payload.label)}, this one was always yours.`;
+          }
+        }
+      } catch (_) {
+        // Ignore storage errors quietly.
+      }
+
+      document.getElementById("back-button").addEventListener("click", () => {
+        window.sessionStorage.removeItem(OUTCOME_STORAGE_KEY);
+        window.location.href = "./index.html";
+      });
+
+      document.getElementById("stay-button").addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    </script>
+  </body>
+</html>

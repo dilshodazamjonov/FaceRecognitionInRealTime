@@ -14,7 +14,7 @@ try:
         extract_single_face_embedding,
         find_first_image,
     )
-    from .storage import get_default_reference_path, save_reference
+    from .storage import get_default_reference_path, save_reference_variants
 except ImportError:  # pragma: no cover - supports direct script execution
     from face_pipeline import (
         DEFAULT_MATCH_THRESHOLD,
@@ -23,7 +23,7 @@ except ImportError:  # pragma: no cover - supports direct script execution
         extract_single_face_embedding,
         find_first_image,
     )
-    from storage import get_default_reference_path, save_reference
+    from storage import get_default_reference_path, save_reference_variants
 
 
 def enroll_reference(
@@ -49,6 +49,7 @@ def enroll_reference_from_image_source(
     label: str = "girlfriend",
     output_path: str | Path | None = None,
     threshold: float = DEFAULT_MATCH_THRESHOLD,
+    archive_output_path: str | Path | None = None,
 ) -> Path:
     """Create and save the reference embedding from a path or in-memory image."""
 
@@ -57,15 +58,21 @@ def enroll_reference_from_image_source(
         model_name=MODEL_NAME,
         detector_backend=DETECTOR_BACKEND,
     )
-    return save_reference(
+    primary_path = Path(output_path) if output_path else get_default_reference_path()
+    output_paths = [primary_path]
+    if archive_output_path is not None:
+        output_paths.append(Path(archive_output_path))
+
+    saved_paths = save_reference_variants(
         embedding=embedding_result.embedding,
         label=label,
-        output_path=output_path,
+        output_paths=output_paths,
         source_image_path=source_image_path,
         threshold=threshold,
         model_name=MODEL_NAME,
         detector_backend=DETECTOR_BACKEND,
     )
+    return saved_paths[0]
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#2a1715">
+    <title>ForGF | Not Passed</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ivory: #fbf4eb;
+        --linen: #f1dfd1;
+        --rose: #d7a097;
+        --wine: #7b3036;
+        --ink: #231514;
+        --muted: #775f59;
+        --line: rgba(123, 48, 54, 0.16);
+        --shadow: 0 24px 64px rgba(67, 38, 37, 0.12);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { min-height: 100%; }
+
+      body {
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        font-family: "Trebuchet MS", "Avenir Next", Verdana, sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(215, 160, 151, 0.24), transparent 32%),
+          linear-gradient(180deg, var(--ivory) 0%, var(--linen) 100%);
+      }
+
+      .card {
+        width: min(100%, 760px);
+        padding: clamp(30px, 7vw, 56px);
+        border-radius: 30px;
+        border: 1px solid var(--line);
+        background: rgba(255, 251, 247, 0.76);
+        box-shadow: var(--shadow);
+      }
+
+      .eyebrow {
+        margin: 0 0 16px;
+        color: var(--wine);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2.6rem, 8vw, 5.4rem);
+        line-height: 0.98;
+        font-weight: 500;
+      }
+
+      .message {
+        max-width: 560px;
+        margin: 20px 0 0;
+        color: var(--muted);
+        font-size: clamp(1rem, 2vw, 1.12rem);
+        line-height: 1.8;
+      }
+
+      .actions {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+      }
+
+      .button {
+        min-height: 48px;
+        padding: 14px 20px;
+        border: 0;
+        border-radius: 999px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+      }
+
+      .button.primary {
+        background: var(--wine);
+        color: var(--ivory);
+      }
+
+      .button.ghost {
+        background: rgba(123, 48, 54, 0.06);
+        color: var(--wine);
+        border: 1px solid rgba(123, 48, 54, 0.14);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <p class="eyebrow">Not Passed</p>
+      <h1>No, not this time.</h1>
+      <p class="message" id="failed-message">Try again with only your face in the frame and a bit more light.</p>
+      <div class="actions">
+        <button class="button primary" id="retry-button" type="button">Try again</button>
+        <button class="button ghost" id="back-button" type="button">Back to start</button>
+      </div>
+    </main>
+
+    <script>
+      const OUTCOME_STORAGE_KEY = "forgfLastOutcome";
+
+      try {
+        const raw = window.sessionStorage.getItem(OUTCOME_STORAGE_KEY);
+        if (raw) {
+          const payload = JSON.parse(raw);
+          if (payload && payload.type === "blocked" && payload.message) {
+            document.getElementById("failed-message").textContent = payload.message;
+          }
+        }
+      } catch (_) {
+        // Ignore storage errors quietly.
+      }
+
+      document.getElementById("retry-button").addEventListener("click", () => {
+        window.location.href = "./index.html";
+      });
+
+      document.getElementById("back-button").addEventListener("click", () => {
+        window.sessionStorage.removeItem(OUTCOME_STORAGE_KEY);
+        window.location.href = "./index.html";
+      });
+    </script>
+  </body>
+</html>

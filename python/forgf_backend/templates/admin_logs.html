@@ -7,15 +7,19 @@
     <style>
         :root {
             color-scheme: light;
-            --bg: #f6f2ea;
-            --paper: #fffdf8;
-            --ink: #1f1a17;
-            --muted: #7a6e65;
-            --line: #e4d9ca;
-            --accent: #c95f4a;
-            --good: #2f8f5b;
-            --warn: #d48a24;
-            --bad: #b4493d;
+            --bg: #f7efe8;
+            --paper: rgba(255, 252, 248, 0.84);
+            --paper-strong: #fffaf5;
+            --ink: #231614;
+            --muted: #7f6661;
+            --line: rgba(116, 74, 68, 0.16);
+            --accent: #c46f6d;
+            --accent-deep: #7e2f3a;
+            --good: #7c8f61;
+            --warn: #c5924d;
+            --bad: #b0525a;
+            --gold: #d3ad74;
+            --shadow: 0 22px 60px rgba(63, 38, 35, 0.12);
         }
 
         * { box-sizing: border-box; }
@@ -24,49 +28,104 @@
             padding: 24px;
             font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
             background:
-                radial-gradient(circle at top left, rgba(201, 95, 74, 0.12), transparent 32%),
-                linear-gradient(180deg, #faf6ef 0%, var(--bg) 100%);
+                radial-gradient(circle at top left, rgba(196, 111, 109, 0.18), transparent 34%),
+                radial-gradient(circle at 85% 10%, rgba(211, 173, 116, 0.14), transparent 28%),
+                linear-gradient(180deg, #fbf5ef 0%, var(--bg) 100%);
             color: var(--ink);
         }
 
         .shell {
-            max-width: 1280px;
+            max-width: 1340px;
             margin: 0 auto;
         }
 
         .hero {
-            background: var(--paper);
+            position: relative;
+            overflow: hidden;
+            background:
+                linear-gradient(135deg, rgba(196, 111, 109, 0.08), transparent 36%),
+                linear-gradient(180deg, rgba(255, 250, 245, 0.94), rgba(255, 253, 248, 0.9));
             border: 1px solid var(--line);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 12px 36px rgba(63, 44, 34, 0.08);
+            border-radius: 30px;
+            padding: 28px;
+            box-shadow: var(--shadow);
             margin-bottom: 20px;
+        }
+
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: start;
         }
 
         .hero h1 {
             margin: 0 0 8px;
-            font-size: 30px;
+            font-size: 34px;
             line-height: 1.1;
+            font-family: Georgia, "Times New Roman", serif;
+            font-weight: 500;
         }
 
         .hero p {
             margin: 0;
             color: var(--muted);
+            max-width: 700px;
+            line-height: 1.65;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            right: -30px;
+            top: -40px;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle, rgba(196, 111, 109, 0.18), rgba(196, 111, 109, 0.02) 65%, transparent 72%);
+            pointer-events: none;
+        }
+
+        .hero-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            color: var(--accent-deep);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .hero-kicker::before {
+            content: "";
+            width: 30px;
+            height: 1px;
+            background: rgba(126, 47, 58, 0.35);
+        }
+
+        .logout-form {
+            margin: 0;
+            position: relative;
+            z-index: 1;
         }
 
         .cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
             gap: 14px;
             margin-bottom: 20px;
         }
 
         .card {
             background: var(--paper);
+            backdrop-filter: blur(14px);
             border: 1px solid var(--line);
-            border-radius: 18px;
+            border-radius: 22px;
             padding: 18px;
-            box-shadow: 0 10px 24px rgba(63, 44, 34, 0.05);
+            box-shadow: 0 12px 30px rgba(63, 44, 34, 0.06);
         }
 
         .card .label {
@@ -78,16 +137,37 @@
 
         .card .value {
             margin-top: 8px;
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 700;
+        }
+
+        .card.accent .value {
+            color: var(--accent-deep);
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: 1.05fr 1.45fr;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: var(--paper);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
         }
 
         .table-wrap {
             background: var(--paper);
+            backdrop-filter: blur(14px);
             border: 1px solid var(--line);
-            border-radius: 24px;
+            border-radius: 28px;
             overflow: hidden;
-            box-shadow: 0 12px 36px rgba(63, 44, 34, 0.08);
+            box-shadow: var(--shadow);
         }
 
         .hero-actions,
@@ -108,8 +188,9 @@
             font-weight: 600;
         }
 
-        .table-head {
-            padding: 18px 20px;
+        .table-head,
+        .panel-head {
+            padding: 20px 22px;
             border-bottom: 1px solid var(--line);
             display: flex;
             justify-content: space-between;
@@ -117,14 +198,85 @@
             align-items: center;
         }
 
-        .table-head h2 {
+        .table-head h2,
+        .panel-head h2 {
             margin: 0;
-            font-size: 20px;
+            font-size: 22px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-weight: 500;
         }
 
-        .table-head span {
+        .table-head span,
+        .panel-head span {
             color: var(--muted);
             font-size: 13px;
+        }
+
+        .failed-list {
+            display: grid;
+            gap: 14px;
+            padding: 18px;
+        }
+
+        .failed-card {
+            border: 1px solid rgba(126, 47, 58, 0.08);
+            border-radius: 22px;
+            padding: 16px;
+            background:
+                linear-gradient(180deg, rgba(255, 250, 245, 0.92), rgba(255, 248, 243, 0.84));
+        }
+
+        .failed-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .failed-time {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .failed-message {
+            margin: 0 0 14px;
+            line-height: 1.6;
+        }
+
+        .failed-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .mini-stat {
+            padding: 10px 12px;
+            border-radius: 16px;
+            background: rgba(126, 47, 58, 0.04);
+            border: 1px solid rgba(126, 47, 58, 0.08);
+        }
+
+        .mini-stat .label {
+            color: var(--muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .mini-stat .value {
+            margin-top: 6px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .failed-device {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 14px;
         }
 
         .table-scroll {
@@ -134,7 +286,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 980px;
+            min-width: 1050px;
         }
 
         th, td {
@@ -146,7 +298,7 @@
         }
 
         th {
-            background: #fbf8f2;
+            background: rgba(251, 248, 242, 0.95);
             color: var(--muted);
             font-weight: 600;
             text-transform: uppercase;
@@ -166,6 +318,11 @@
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.04em;
+        }
+
+        .pill.failed {
+            color: white;
+            background: var(--accent-deep);
         }
 
         .pill.match {
@@ -214,11 +371,23 @@
             background: var(--bad);
         }
 
+        .button.soft {
+            color: var(--accent-deep);
+            background: rgba(126, 47, 58, 0.06);
+            border-color: rgba(126, 47, 58, 0.16);
+        }
+
         .button.delete {
             color: var(--bad);
             background: rgba(180, 73, 61, 0.08);
             border-color: rgba(180, 73, 61, 0.22);
             padding: 8px 12px;
+        }
+
+        .empty-state {
+            padding: 26px 22px;
+            color: var(--muted);
+            line-height: 1.6;
         }
 
         @media (max-width: 720px) {
@@ -234,13 +403,27 @@
                 font-size: 24px;
             }
         }
+
+        @media (max-width: 1080px) {
+            .split {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="shell">
         <section class="hero">
-            <h1>ForGF Access Logs</h1>
-            <p>Recent verification attempts, user IPs, browser/device hints, and face-match outcomes.</p>
+            <div class="hero-top">
+                <div>
+                    <div class="hero-kicker">Private Diary</div>
+                    <h1>ForGF Access Logs</h1>
+                    <p>A soft admin view for the little face-gate: failed sessions, frame-by-frame checks, and a quick sense of what the camera saw.</p>
+                </div>
+                <form class="logout-form" method="post" action="/admin/logout">
+                    <button class="button soft" type="submit">Log out</button>
+                </form>
+            </div>
             {% if notice %}
             <div class="notice">{{ notice }}</div>
             {% endif %}
@@ -267,17 +450,77 @@
                 <div class="label">Multiple Faces</div>
                 <div class="value">{{ summary.multiple_faces }}</div>
             </div>
+            <div class="card accent">
+                <div class="label">Failed Sessions</div>
+                <div class="value">{{ summary.failed_sessions }}</div>
+            </div>
         </section>
+
+        <section class="split">
+            <section class="panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>Sessions That Did Not Unlock</h2>
+                        <span>These are the real tries that ended blocked.</span>
+                    </div>
+                    <span>Latest {{ failed_sessions|length }}</span>
+                </div>
+                {% if failed_sessions %}
+                <div class="failed-list">
+                    {% for failed in failed_sessions %}
+                    <article class="failed-card">
+                        <div class="failed-meta">
+                            <span class="pill failed">{{ failed.reason }}</span>
+                            <div class="failed-time">
+                                <div>{{ failed.created_at }}</div>
+                                <div>{{ failed.ip_address }}</div>
+                            </div>
+                        </div>
+                        <p class="failed-message">{{ failed.message }}</p>
+                        <div class="failed-stats">
+                            <div class="mini-stat">
+                                <div class="label">Verify Calls</div>
+                                <div class="value">{{ failed.verify_requests }}</div>
+                            </div>
+                            <div class="mini-stat">
+                                <div class="label">Session Seconds</div>
+                                <div class="value">{{ "%.1f"|format(failed.session_seconds) }}</div>
+                            </div>
+                            <div class="mini-stat">
+                                <div class="label">Peak Unknown</div>
+                                <div class="value">{{ failed.unknown_streak_peak }}</div>
+                            </div>
+                            <div class="mini-stat">
+                                <div class="label">Best Match Streak</div>
+                                <div class="value">{{ failed.match_streak_peak }}</div>
+                            </div>
+                        </div>
+                        <div class="failed-device">
+                            <div>{{ failed.device_name }}</div>
+                            <div>{{ failed.browser_name }} on {{ failed.os_name }}</div>
+                        </div>
+                        <form class="action-form" method="post" action="/admin/failed-sessions/{{ failed.id }}/delete" onsubmit="return confirm('Delete this failed session?');">
+                            <button class="button soft" type="submit">Delete Failed Session</button>
+                        </form>
+                    </article>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">No blocked sessions have been recorded yet.</div>
+                {% endif %}
+            </section>
 
         <section class="table-wrap">
             <div class="table-head">
-                <h2>Recent Attempts</h2>
+                <div>
+                    <h2>Frame-By-Frame Verify Checks</h2>
+                    <span>These are the raw verify rows written by each backend image check.</span>
+                </div>
                 <div class="table-actions">
                     <span>Showing the latest {{ log_limit }} rows</span>
                     {% if logs %}
                     <form class="action-form" method="post" action="/admin/logs/clear" onsubmit="return confirm('Delete all stored log entries?');">
-                        <input type="hidden" name="token" value="{{ admin_token }}">
-                        <button class="button clear" type="submit">Delete All Logs</button>
+                        <button class="button clear" type="submit">Delete All Rows</button>
                     </form>
                     {% endif %}
                 </div>
@@ -317,7 +560,6 @@
                             <td>{{ "%.4f"|format(log.threshold) if log.threshold is not none else "-" }}</td>
                             <td>
                                 <form class="action-form" method="post" action="/admin/logs/{{ log.id }}/delete" onsubmit="return confirm('Delete this log entry?');">
-                                    <input type="hidden" name="token" value="{{ admin_token }}">
                                     <button class="button delete" type="submit">Delete</button>
                                 </form>
                             </td>
@@ -330,6 +572,7 @@
                     </tbody>
                 </table>
             </div>
+        </section>
         </section>
     </div>
 </body>

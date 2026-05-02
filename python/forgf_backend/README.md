@@ -20,6 +20,7 @@ Example with a custom admin token and a non-default port:
 
 ```powershell
 $env:FORGF_ADMIN_TOKEN='my-secret-token'
+$env:FORGF_ADMIN_PASSWORD='my-secret-password'
 $env:FORGF_PORT='8001'
 uv run --project . forgf-backend
 ```
@@ -55,7 +56,7 @@ Copy-Item .\python\.env.example .\python\.env
 Open:
 
 ```text
-http://127.0.0.1:8000/admin/logs?token=change-me-admin-token
+http://127.0.0.1:8000/admin
 ```
 
 Use `python/.env` for real local settings and `python/.env.example` as the template.
@@ -63,8 +64,15 @@ Use `python/.env` for real local settings and `python/.env.example` as the templ
 With the custom token and port example above, open:
 
 ```text
-http://127.0.0.1:8001/admin/logs?token=my-secret-token
+http://127.0.0.1:8001/admin
 ```
+
+Login behavior:
+
+- the admin page now uses a simple password form
+- if `FORGF_ADMIN_PASSWORD` is set, that is the password
+- otherwise the backend falls back to `FORGF_ADMIN_TOKEN` as the password
+- after login, the browser keeps an admin cookie so you do not need to paste a token into the URL
 
 The admin page currently shows:
 
@@ -95,4 +103,4 @@ Then open:
 
 - `http://127.0.0.1:8001/health`
 - `http://127.0.0.1:8001/docs`
-- `http://127.0.0.1:8001/admin/logs?token=my-secret-token`
+- `http://127.0.0.1:8001/admin`

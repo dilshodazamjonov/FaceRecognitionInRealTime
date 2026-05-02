@@ -46,7 +46,14 @@ def _parse_bool(raw_value: str | None, default: bool) -> bool:
 
 def _parse_origins(raw_value: str | None) -> tuple[str, ...]:
     if not raw_value:
-        return ("http://localhost:3000", "http://127.0.0.1:3000")
+        return (
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:5500",
+            "http://127.0.0.1:5500",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        )
     return tuple(origin.strip() for origin in raw_value.split(",") if origin.strip())
 
 
@@ -61,6 +68,7 @@ class AppConfig:
     reference_path: Path
     database_path: Path
     admin_token: str
+    admin_password: str
     log_limit: int
     template_dir: Path
     max_inference_dimension: int
@@ -88,6 +96,10 @@ def get_config() -> AppConfig:
         reference_path=reference_path,
         database_path=PYTHON_ROOT / "forgf_backend" / "data" / "forgf_logs.sqlite3",
         admin_token=os.getenv("FORGF_ADMIN_TOKEN", "change-me-admin-token"),
+        admin_password=os.getenv(
+            "FORGF_ADMIN_PASSWORD",
+            os.getenv("FORGF_ADMIN_TOKEN", "change-me-admin-token"),
+        ),
         log_limit=int(os.getenv("FORGF_LOG_LIMIT", "200")),
         template_dir=PYTHON_ROOT / "forgf_backend" / "templates",
         max_inference_dimension=int(os.getenv("FORGF_MAX_INFERENCE_DIMENSION", "640")),

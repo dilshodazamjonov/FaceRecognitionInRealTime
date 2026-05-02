@@ -24,6 +24,7 @@ class EnrollResponse(BaseModel):
     success: bool
     label: str
     reference_path: str
+    labeled_reference_path: str | None = None
     threshold: float
 
 
@@ -49,3 +50,7 @@ class ErrorDetail(BaseModel):
 class ErrorResponse(BaseModel):
     error: ErrorDetail
 
+
+class ActionResponse(BaseModel):
+    success: bool
+    message: str | None = None
