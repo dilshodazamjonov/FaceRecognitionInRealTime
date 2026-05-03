@@ -1,13 +1,15 @@
 const VERIFY_INTERVAL_MS = 900;
-const CAPTURE_MAX_WIDTH = 720;
+const CAPTURE_MAX_WIDTH = 320;
+const CAPTURE_JPEG_QUALITY = 0.58;
 const GUIDE_TARGET_X = 0.5;
 const GUIDE_TARGET_Y = 0.43;
 const OUTCOME_STORAGE_KEY = "forgfLastOutcome";
-const STATUS_STORAGE_KEY = "forgfLastStatus";
-const FACE_FOUND_STORAGE_KEY = "forgfFaceFound";
-const FACE_FOUND_MAX_AGE_MS = 10 * 60 * 1000;
+const FRAME_VERIFY_MIN_GAP_MS = 900;
+const VERIFY_REQUEST_TIMEOUT_MS = 60000;
 
 const elements = {
+  statusDock: document.querySelector("#status-dock"),
+  statusProgress: document.querySelector(".status-dock-progress"),
   stopButton: document.querySelector("#stop-button"),
   continueButton: document.querySelector("#continue-button"),
   video: document.querySelector("#camera-video"),
@@ -24,6 +26,7 @@ const elements = {
 
 const state = {
   stream: null,
+  imageCapture: null,
   pollTimer: null,
   activeRequest: null,
   isVerifying: false,
@@ -31,6 +34,13 @@ const state = {
   unlockedLabel: "",
   lastCaptureWidth: 0,
   lastCaptureHeight: 0,
+  toastTimer: null,
+  lastToastKey: "",
+  unlockTimer: null,
+  startupTimers: [],
+  videoFrameLoopRunning: false,
+  lastVerifyStartedAt: 0,
+  lastFrameWaitNoticeAt: 0,
 };
 
 function getBackendBaseUrl() {
@@ -67,18 +77,51 @@ function prettifyLabel(label) {
     .join(" ");
 }
 
-function setStatusDock(stateLabel, message) {
+function toastTone(stateLabel) {
+  const normalized = stateLabel.toLowerCase();
+  if (normalized.includes("found") || normalized.includes("passed")) {
+    return "success";
+  }
+  if (
+    normalized.includes("error") ||
+    normalized.includes("blocked") ||
+    normalized.includes("too many") ||
+    normalized.includes("no face")
+  ) {
+    return "failure";
+  }
+  return "info";
+}
+
+function setStatusDock(stateLabel, message, options = {}) {
+  const key = `${stateLabel}:${message}`;
+  if (!options.force && key === state.lastToastKey && elements.statusDock.classList.contains("is-visible")) {
+    return;
+  }
+
+  state.lastToastKey = key;
   elements.backendState.textContent = stateLabel;
   elements.lastResult.textContent = message;
+  elements.statusDock.dataset.tone = toastTone(stateLabel);
+  elements.statusDock.classList.remove("is-visible");
+  elements.statusProgress.style.animation = "none";
+  void elements.statusDock.offsetWidth;
+  void elements.statusProgress.offsetWidth;
+  elements.statusProgress.style.animation = "";
 
-  try {
-    window.sessionStorage.setItem(
-      STATUS_STORAGE_KEY,
-      JSON.stringify({ stateLabel, message, savedAt: Date.now() }),
-    );
-  } catch (_) {
-    // Ignore storage failures.
+  window.requestAnimationFrame(() => {
+    elements.statusDock.classList.add("is-visible");
+  });
+
+  if (state.toastTimer) {
+    window.clearTimeout(state.toastTimer);
   }
+
+  state.toastTimer = window.setTimeout(() => {
+    elements.statusDock.classList.remove("is-visible");
+    state.toastTimer = null;
+  }, 3000);
+
 }
 
 function setVerificationState(status, kicker, message, chipLabel) {
@@ -92,50 +135,16 @@ function setFaceGuideState(guide) {
   elements.cameraStage.dataset.faceGuide = guide;
 }
 
+function getVideoTrack() {
+  return state.stream ? state.stream.getVideoTracks()[0] : null;
+}
+
 function setContinueEnabled(enabled, label = "") {
   state.passed = enabled;
   state.unlockedLabel = enabled ? label : "";
   elements.continueButton.disabled = !enabled;
-}
-
-function saveFaceFound(label) {
-  try {
-    window.sessionStorage.setItem(
-      FACE_FOUND_STORAGE_KEY,
-      JSON.stringify({
-        label,
-        savedAt: Date.now(),
-      }),
-    );
-  } catch (_) {
-    // Ignore storage failures.
-  }
-}
-
-function loadFaceFound() {
-  try {
-    const raw = window.sessionStorage.getItem(FACE_FOUND_STORAGE_KEY);
-    if (!raw) {
-      return null;
-    }
-
-    const parsed = JSON.parse(raw);
-    if (!parsed || !parsed.savedAt || Date.now() - parsed.savedAt > FACE_FOUND_MAX_AGE_MS) {
-      window.sessionStorage.removeItem(FACE_FOUND_STORAGE_KEY);
-      return null;
-    }
-
-    return parsed;
-  } catch (_) {
-    return null;
-  }
-}
-
-function clearFaceFound() {
-  try {
-    window.sessionStorage.removeItem(FACE_FOUND_STORAGE_KEY);
-  } catch (_) {
-    // Ignore storage failures.
+  if (!enabled) {
+    delete elements.cameraStage.dataset.skyOpen;
   }
 }
 
@@ -154,20 +163,30 @@ function saveOutcome(label) {
   }
 }
 
-function unlockContinue(label, message, statusLabel = "Face Found") {
+function unlockContinue(label, statusLabel = "Face Found") {
   const normalizedLabel = label || "face found";
   state.passed = true;
   state.unlockedLabel = normalizedLabel;
+  if (state.unlockTimer) {
+    window.clearTimeout(state.unlockTimer);
+    state.unlockTimer = null;
+  }
   if (state.pollTimer) {
     window.clearInterval(state.pollTimer);
     state.pollTimer = null;
   }
+  state.videoFrameLoopRunning = false;
   paintStability(3);
-  elements.continueButton.disabled = false;
-  setVerificationState("revealed", "found a face", message, "ready");
-  setStatusDock(statusLabel, message);
-  saveFaceFound(normalizedLabel);
+  elements.continueButton.disabled = true;
+  elements.cameraStage.dataset.skyOpen = "true";
+  setVerificationState("revealed", "confirmed", "Ready.", "ready");
+  setStatusDock(statusLabel, "Face found. Continue is ready.", { force: true });
   saveOutcome(normalizedLabel);
+
+  state.unlockTimer = window.setTimeout(() => {
+    elements.continueButton.disabled = false;
+    state.unlockTimer = null;
+  }, 850);
 }
 
 function hideFaceHintBox() {
@@ -195,16 +214,29 @@ function stopPolling() {
     state.activeRequest = null;
   }
   state.isVerifying = false;
+  state.videoFrameLoopRunning = false;
+}
+
+function clearStartupTimers() {
+  state.startupTimers.forEach((timer) => window.clearTimeout(timer));
+  state.startupTimers = [];
 }
 
 function stopCamera() {
   stopPolling();
+  clearStartupTimers();
+
+  if (state.unlockTimer) {
+    window.clearTimeout(state.unlockTimer);
+    state.unlockTimer = null;
+  }
 
   if (state.stream) {
     state.stream.getTracks().forEach((track) => track.stop());
     state.stream = null;
   }
 
+  state.imageCapture = null;
   elements.video.srcObject = null;
 }
 
@@ -216,9 +248,10 @@ function formatFetchError(error) {
   return error && error.message ? error.message : "Something did not work. Try again.";
 }
 
-function drawFrameToCanvas() {
-  const videoWidth = elements.video.videoWidth;
-  const videoHeight = elements.video.videoHeight;
+function drawVideoFrameToCanvas() {
+  const trackSettings = getVideoTrack() ? getVideoTrack().getSettings() : {};
+  const videoWidth = elements.video.videoWidth || trackSettings.width || 0;
+  const videoHeight = elements.video.videoHeight || trackSettings.height || 0;
 
   if (!videoWidth || !videoHeight) {
     return false;
@@ -233,19 +266,129 @@ function drawFrameToCanvas() {
   elements.canvas.height = height;
   state.lastCaptureWidth = width;
   state.lastCaptureHeight = height;
-  context.drawImage(elements.video, 0, 0, width, height);
-  return true;
+  try {
+    context.drawImage(elements.video, 0, 0, width, height);
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
-function canvasToBlob(canvas) {
+function withTimeout(promise, timeoutMs) {
+  let timeout = null;
+  const timeoutPromise = new Promise((resolve) => {
+    timeout = window.setTimeout(() => resolve(null), timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timeout) {
+      window.clearTimeout(timeout);
+    }
+  });
+}
+
+async function drawCameraTrackToCanvas() {
+  if (!state.imageCapture) {
+    return false;
+  }
+
+  let frame = null;
+
+  try {
+    frame = await withTimeout(state.imageCapture.grabFrame(), 260);
+    if (!frame) {
+      return false;
+    }
+    const sourceWidth = frame.width;
+    const sourceHeight = frame.height;
+
+    if (!sourceWidth || !sourceHeight) {
+      return false;
+    }
+
+    const scale = Math.min(1, CAPTURE_MAX_WIDTH / sourceWidth);
+    const width = Math.max(1, Math.round(sourceWidth * scale));
+    const height = Math.max(1, Math.round(sourceHeight * scale));
+    const context = elements.canvas.getContext("2d", { alpha: false });
+
+    elements.canvas.width = width;
+    elements.canvas.height = height;
+    state.lastCaptureWidth = width;
+    state.lastCaptureHeight = height;
+    context.drawImage(frame, 0, 0, width, height);
+    return true;
+  } catch (_) {
+    return false;
+  } finally {
+    if (frame && typeof frame.close === "function") {
+      frame.close();
+    }
+  }
+}
+
+async function drawFrameToCanvas() {
+  if (drawVideoFrameToCanvas()) {
+    return true;
+  }
+
+  return drawCameraTrackToCanvas();
+}
+
+function canvasToImageData(canvas) {
+  try {
+    return canvas.toDataURL("image/jpeg", CAPTURE_JPEG_QUALITY);
+  } catch (_) {
+    return null;
+  }
+}
+
+function postVerifyFrame(imageData) {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) {
-        resolve(blob);
-      } else {
-        reject(new Error("Frame capture failed."));
+    const xhr = new XMLHttpRequest();
+    state.activeRequest = xhr;
+
+    xhr.open("POST", `${BACKEND_BASE_URL}/verify-frame-text`, true);
+    xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+    xhr.responseType = "json";
+    xhr.timeout = VERIFY_REQUEST_TIMEOUT_MS;
+
+    xhr.onload = () => {
+      if (state.activeRequest === xhr) {
+        state.activeRequest = null;
       }
-    }, "image/jpeg", 0.82);
+
+      const payload = xhr.response || null;
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(payload);
+        return;
+      }
+
+      const message = payload && payload.error ? payload.error.message : "Verification is not available.";
+      reject(new Error(message));
+    };
+
+    xhr.onerror = () => {
+      if (state.activeRequest === xhr) {
+        state.activeRequest = null;
+      }
+      reject(new Error(`Failed to fetch from backend at ${BACKEND_BASE_URL}.`));
+    };
+
+    xhr.ontimeout = () => {
+      if (state.activeRequest === xhr) {
+        state.activeRequest = null;
+      }
+      reject(new Error("Backend request timed out."));
+    };
+
+    xhr.onabort = () => {
+      if (state.activeRequest === xhr) {
+        state.activeRequest = null;
+      }
+      reject(new DOMException("Request aborted.", "AbortError"));
+    };
+
+    xhr.send(imageData);
   });
 }
 
@@ -321,30 +464,30 @@ function deriveGuide(metrics) {
 
 function guidanceCopy(status, guide) {
   if (status === "multiple_faces") {
-    return "I found more than one person. Keep it just one face for me.";
+    return "One face only.";
   }
 
   if (status === "no_face") {
-    return "I can't see anyone yet. Come into the little frame for me.";
+    return "No face.";
   }
 
   if (guide === "too_far") {
-    return "Come a little closer.";
+    return "Closer.";
   }
 
   if (guide === "too_close") {
-    return "Ease back just a touch.";
+    return "Back a little.";
   }
 
   if (guide === "off_center") {
-    return "Center your face in the little frame.";
+    return "Center up.";
   }
 
   if (status === "unknown") {
-    return "I found a person, but it is not the saved match yet.";
+    return "Face found.";
   }
 
-  return "Stay there for a second.";
+  return "Hold still.";
 }
 
 function applyFaceGuide(result) {
@@ -363,28 +506,6 @@ function applyFaceGuide(result) {
   return guidanceCopy(status, guide);
 }
 
-function summarizeResult(result) {
-  const label = prettifyLabel(result && result.label ? result.label : "");
-
-  if (result && result.status === "match" && result.access_granted) {
-    return `Backend connected. Face found for ${label}.`;
-  }
-
-  if (result && result.status === "unknown") {
-    return "Backend connected. Face found.";
-  }
-
-  if (result && result.status === "multiple_faces") {
-    return "Backend connected. More than one face was seen.";
-  }
-
-  if (result && result.status === "no_face") {
-    return "Backend connected. No face was detected.";
-  }
-
-  return "Backend connected. A verify result was received.";
-}
-
 function handleVerificationResult(result) {
   if (state.passed) {
     return;
@@ -395,15 +516,14 @@ function handleVerificationResult(result) {
   const matchedLabel = result && result.label ? result.label : "";
 
   if (status === "match" && result.access_granted) {
-    const displayName = prettifyLabel(matchedLabel);
     hideFaceHintBox();
-    unlockContinue(matchedLabel, `${displayName}, you can continue whenever you want.`);
+    unlockContinue(matchedLabel);
     return;
   }
 
   if (status === "unknown") {
     hideFaceHintBox();
-    unlockContinue("face found", "Face found. You can continue whenever you want.");
+    unlockContinue("face found");
     return;
   }
 
@@ -411,16 +531,18 @@ function handleVerificationResult(result) {
   resetStability();
 
   if (status === "multiple_faces") {
-    setVerificationState("multiple_faces", "too many people", guidance, "one face");
+    setVerificationState("multiple_faces", "too many", guidance, "one face");
+    setStatusDock("Too Many Faces", "Keep one person in frame.");
     return;
   }
 
   if (status === "no_face") {
-    setVerificationState("no_face", "no one yet", guidance, "searching");
+    setVerificationState("no_face", "searching", guidance, "searching");
+    setStatusDock("No Face", "No face detected.");
     return;
   }
 
-  setVerificationState("idle", "still looking", guidance, "waiting");
+  setVerificationState("idle", "checking", guidance, "waiting");
 }
 
 async function verifyCurrentFrame() {
@@ -428,36 +550,31 @@ async function verifyCurrentFrame() {
     return;
   }
 
-  if (!drawFrameToCanvas()) {
+  const now = Date.now();
+  if (now - state.lastVerifyStartedAt < FRAME_VERIFY_MIN_GAP_MS) {
     return;
   }
 
+  if (!(await drawFrameToCanvas())) {
+    if (now - state.lastFrameWaitNoticeAt > 1400) {
+      state.lastFrameWaitNoticeAt = now;
+      setVerificationState("idle", "checking", "Waiting for camera frame.", "video");
+    }
+    return;
+  }
+
+  state.lastVerifyStartedAt = now;
   state.isVerifying = true;
-  const controller = new AbortController();
-  state.activeRequest = controller;
+  setVerificationState("idle", "checking", "Checking with backend.", "live");
 
   try {
-    const blob = await canvasToBlob(elements.canvas);
-    const formData = new FormData();
-    formData.append("image", blob, "camera-frame.jpg");
-
-    const response = await fetch(`${BACKEND_BASE_URL}/verify`, {
-      method: "POST",
-      body: formData,
-      signal: controller.signal,
-    });
-
-    if (state.passed) {
-      return;
+    const imageData = canvasToImageData(elements.canvas);
+    if (!imageData) {
+      throw new Error("Frame capture failed.");
     }
 
-    const payload = await response.json().catch(() => null);
-    if (!response.ok) {
-      const message = payload && payload.error ? payload.error.message : "Verification is not available.";
-      throw new Error(message);
-    }
+    const payload = await postVerifyFrame(imageData);
 
-    setStatusDock("Backend Connected", summarizeResult(payload));
     handleVerificationResult(payload);
   } catch (error) {
     if (error && error.name === "AbortError") {
@@ -473,32 +590,88 @@ async function verifyCurrentFrame() {
     hideFaceHintBox();
     setContinueEnabled(false);
     setStatusDock("Backend Error", errorMessage);
-    setVerificationState("idle", "still here", errorMessage, "waiting");
+    setVerificationState("idle", "waiting", "Retrying.", "waiting");
   } finally {
-    if (state.activeRequest === controller) {
-      state.activeRequest = null;
-    }
     state.isVerifying = false;
   }
 }
 
 function startPolling() {
-  stopPolling();
+  if (state.pollTimer || state.passed) {
+    return;
+  }
+
+  setVerificationState("idle", "checking", "Scanning.", "live");
   verifyCurrentFrame();
   state.pollTimer = window.setInterval(verifyCurrentFrame, VERIFY_INTERVAL_MS);
 }
 
-async function startCamera() {
-  const savedFace = loadFaceFound();
-  if (!savedFace) {
-    setContinueEnabled(false);
+function startVideoFrameVerificationLoop() {
+  if (
+    state.videoFrameLoopRunning ||
+    !state.stream ||
+    state.passed ||
+    typeof elements.video.requestVideoFrameCallback !== "function"
+  ) {
+    return;
   }
+
+  state.videoFrameLoopRunning = true;
+
+  const onFrame = () => {
+    if (!state.videoFrameLoopRunning || !state.stream || state.passed) {
+      state.videoFrameLoopRunning = false;
+      return;
+    }
+
+    verifyCurrentFrame();
+    elements.video.requestVideoFrameCallback(onFrame);
+  };
+
+  elements.video.requestVideoFrameCallback(onFrame);
+}
+
+function startVerificationLoops() {
+  if (!state.stream || state.passed) {
+    return;
+  }
+
+  clearStartupTimers();
+  startPolling();
+}
+
+function scheduleStartupPollChecks() {
+  clearStartupTimers();
+  [80, 240, 520, 900, 1500, 2400].forEach((delay) => {
+    state.startupTimers.push(window.setTimeout(startVerificationLoops, delay));
+  });
+}
+
+function handleCameraOpenError(error) {
+  const denied = error && (error.name === "NotAllowedError" || error.name === "PermissionDeniedError");
+  setVerificationState(
+    "idle",
+    denied ? "blocked" : "unavailable",
+    denied ? "Camera blocked." : "No camera.",
+    "blocked",
+  );
+  setStatusDock(
+    "Camera Error",
+    denied ? "Camera permission was blocked." : "The camera could not be opened.",
+    { force: true },
+  );
+}
+
+async function startCamera() {
+  setContinueEnabled(false);
   resetStability();
   hideFaceHintBox();
-  setVerificationState("idle", "just checking", "Opening the camera.", "opening");
+  setVerificationState("idle", "checking", "Opening.", "opening");
+  setStatusDock("Connecting", "Connecting to backend.", { force: true });
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    setVerificationState("idle", "camera unavailable", "This browser cannot open the camera here.", "blocked");
+    setVerificationState("idle", "blocked", "No camera.", "blocked");
+    setStatusDock("Camera Error", "This browser cannot open the camera here.", { force: true });
     return;
   }
 
@@ -512,32 +685,31 @@ async function startCamera() {
       },
     });
 
+    elements.video.addEventListener("loadedmetadata", startVerificationLoops);
+    elements.video.addEventListener("canplay", startVerificationLoops);
+    elements.video.addEventListener("playing", startVerificationLoops);
     elements.video.srcObject = state.stream;
-    await elements.video.play();
-
-    if (savedFace) {
-      unlockContinue(
-        savedFace.label,
-        "Face found. You can continue whenever you want.",
-      );
-      return;
+    const [videoTrack] = state.stream.getVideoTracks();
+    if (videoTrack && typeof ImageCapture === "function") {
+      state.imageCapture = new ImageCapture(videoTrack);
+    }
+    const playPromise = elements.video.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch((error) => {
+        if (!state.pollTimer) {
+          handleCameraOpenError(error);
+        }
+      });
     }
 
-    setVerificationState("idle", "just checking", "Stay there for a second.", "looking");
-    startPolling();
+    scheduleStartupPollChecks();
+    startVerificationLoops();
   } catch (error) {
-    const denied = error && (error.name === "NotAllowedError" || error.name === "PermissionDeniedError");
-    setVerificationState(
-      "idle",
-      denied ? "camera blocked" : "camera unavailable",
-      denied ? "The camera permission was blocked." : "The camera could not be opened.",
-      "blocked",
-    );
+    handleCameraOpenError(error);
   }
 }
 
 elements.stopButton.addEventListener("click", () => {
-  clearFaceFound();
   stopCamera();
   window.location.href = "./index.html";
 });
@@ -553,12 +725,12 @@ elements.continueButton.addEventListener("click", () => {
 
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
-    stopPolling();
     return;
   }
 
   if (state.stream && !state.passed) {
-    startPolling();
+    scheduleStartupPollChecks();
+    startVerificationLoops();
   }
 });
 

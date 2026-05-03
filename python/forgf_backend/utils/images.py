@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 from dataclasses import dataclass
 
 import cv2
@@ -66,3 +67,34 @@ async def read_and_decode_upload(
         size_bytes=size_bytes,
     )
 
+
+def decode_base64_image(image_data: str, max_upload_bytes: int) -> DecodedImage:
+    _, separator, payload = image_data.partition(",")
+    encoded = payload if separator else image_data
+
+    try:
+        raw_bytes = base64.b64decode(encoded, validate=True)
+    except ValueError as exc:
+        raise ApiError(400, "invalid_image_data", "Image data must be valid base64.") from exc
+
+    size_bytes = len(raw_bytes)
+    if size_bytes == 0:
+        raise ApiError(400, "empty_upload", "Uploaded image file is empty.")
+    if size_bytes > max_upload_bytes:
+        raise ApiError(
+            400,
+            "file_too_large",
+            f"Uploaded image exceeds the {max_upload_bytes} byte limit.",
+        )
+
+    buffer = np.frombuffer(raw_bytes, dtype=np.uint8)
+    image = cv2.imdecode(buffer, cv2.IMREAD_COLOR)
+    if image is None:
+        raise ApiError(400, "invalid_image", "Uploaded file could not be decoded as an image.")
+
+    return DecodedImage(
+        image=image,
+        filename="camera-frame.jpg",
+        content_type="image/jpeg",
+        size_bytes=size_bytes,
+    )

@@ -3,39 +3,36 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#2a1715">
+    <meta name="theme-color" content="#070b16">
     <title>ForGF</title>
-    <link rel="stylesheet" href="./styles.css?v=6">
+    <link rel="stylesheet" href="./styles.css?v=13">
   </head>
   <body>
     <main class="app" id="app">
-      <section class="screen screen-intro is-active" id="intro-screen" aria-labelledby="intro-title">
+      <section class="screen screen-intro is-active" id="intro-screen" aria-label="Initialization terminal">
         <div class="ambient-frame" aria-hidden="true"></div>
         <div class="intro-halo intro-halo-left" aria-hidden="true"></div>
         <div class="intro-halo intro-halo-right" aria-hidden="true"></div>
+        <div class="star-field intro-stars" aria-hidden="true">
+          <span class="star-layer star-layer-a"></span>
+          <span class="star-layer star-layer-b"></span>
+          <span class="falling-star falling-star-a"></span>
+          <span class="falling-star falling-star-b"></span>
+          <span class="falling-star falling-star-c"></span>
+        </div>
         <div class="intro-stage">
-          <div class="intro-copy">
-            <p class="eyebrow">a little secret</p>
-            <h1 id="intro-title">A tiny hidden door, only for you.</h1>
-            <p class="lead">I wanted the first second to feel soft. Come a little closer and let the camera find you.</p>
-          </div>
           <article class="intro-note">
-            <p class="note-kicker">before it opens</p>
-            <p class="note-line">just you</p>
-            <p class="note-line">a little light</p>
-            <p class="note-line">one calm second</p>
+            <div class="terminal-panel" id="terminal-panel" aria-live="polite"></div>
             <div class="intro-actions">
               <button class="primary-action" id="start-button" type="button">
-                <span>Let me in</span>
-                <span class="action-mark" aria-hidden="true">-></span>
+                Initialize
               </button>
-              <p class="fine-print">It only asks for the camera after you tap.</p>
             </div>
           </article>
         </div>
       </section>
     </main>
 
-    <script src="./app.js?v=6" defer></script>
+    <script src="./app.js?v=13" defer></script>
   </body>
 </html>

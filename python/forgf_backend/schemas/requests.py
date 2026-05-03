@@ -13,3 +13,7 @@ class FailedAttemptRequest(BaseModel):
     unknown_streak_peak: int = Field(default=0, ge=0, le=100)
     match_streak_peak: int = Field(default=0, ge=0, le=100)
     session_seconds: float = Field(default=0.0, ge=0.0, le=3600.0)
+
+
+class VerifyFrameRequest(BaseModel):
+    image_data: str = Field(min_length=1)

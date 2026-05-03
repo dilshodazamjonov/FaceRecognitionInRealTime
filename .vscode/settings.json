@@ -1,0 +1,11 @@
+{
+  "liveServer.settings.ignoreFiles": [
+    "**/python/forgf_backend/data/**",
+    "**/*.sqlite3",
+    "**/*.sqlite3-journal",
+    "**/*.sqlite3-wal",
+    "**/*.sqlite3-shm",
+    "**/__pycache__/**",
+    "**/*.pyc"
+  ]
+}

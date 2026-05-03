@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from urllib.parse import urlencode
 
-from fastapi import APIRouter, Form, Query, Request, UploadFile
+from fastapi import APIRouter, Body, Form, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from ..config import get_config
-from ..schemas.requests import FailedAttemptRequest
+from ..schemas.requests import FailedAttemptRequest, VerifyFrameRequest
 from ..schemas.responses import (
     ActionResponse,
     EnrollResponse,
@@ -32,7 +32,7 @@ from ..services.log_service import (
 from ..services.reference_service import enroll_reference_image, get_reference_status
 from ..utils.client import extract_client_meta
 from ..utils.errors import ApiError
-from ..utils.images import read_and_decode_upload
+from ..utils.images import decode_base64_image, read_and_decode_upload
 
 
 router = APIRouter()
@@ -142,6 +142,33 @@ async def enroll(
 )
 async def verify(request: Request, image: UploadFile) -> VerificationResponse:
     decoded_image = await read_and_decode_upload(image, config.max_upload_bytes)
+    client_meta = extract_client_meta(request)
+    result = verify_frame(config=config, frame=decoded_image.image, client_meta=client_meta)
+    return VerificationResponse(**result)
+
+
+@router.post(
+    "/verify-frame",
+    response_model=VerificationResponse,
+    responses={400: {"model": ErrorResponse}, 409: {"model": ErrorResponse}, 500: {"model": ErrorResponse}},
+)
+async def verify_frame_json(request: Request, payload: VerifyFrameRequest) -> VerificationResponse:
+    decoded_image = decode_base64_image(payload.image_data, config.max_upload_bytes)
+    client_meta = extract_client_meta(request)
+    result = verify_frame(config=config, frame=decoded_image.image, client_meta=client_meta)
+    return VerificationResponse(**result)
+
+
+@router.post(
+    "/verify-frame-text",
+    response_model=VerificationResponse,
+    responses={400: {"model": ErrorResponse}, 409: {"model": ErrorResponse}, 500: {"model": ErrorResponse}},
+)
+async def verify_frame_text(
+    request: Request,
+    image_data: str = Body(..., media_type="text/plain"),
+) -> VerificationResponse:
+    decoded_image = decode_base64_image(image_data, config.max_upload_bytes)
     client_meta = extract_client_meta(request)
     result = verify_frame(config=config, frame=decoded_image.image, client_meta=client_meta)
     return VerificationResponse(**result)

@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Cute Bunny Character</title>
+  <desc id="desc">A cute white bunny in a fluffy pink hooded coat standing in soft snowy night light.</desc>
+  <defs>
+    <radialGradient id="nightGlow" cx="35%" cy="78%" r="72%">
+      <stop offset="0" stop-color="#a9f7ff"/>
+      <stop offset="0.22" stop-color="#455c6e"/>
+      <stop offset="0.72" stop-color="#11121c"/>
+      <stop offset="1" stop-color="#070811"/>
+    </radialGradient>
+    <radialGradient id="pinkGlow" cx="35%" cy="65%" r="56%">
+      <stop offset="0" stop-color="#ff8fbd" stop-opacity="0.72"/>
+      <stop offset="0.42" stop-color="#ff6ca8" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#ff6ca8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="coat" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#ff9fca"/>
+      <stop offset="0.52" stop-color="#ef6fa8"/>
+      <stop offset="1" stop-color="#c94d83"/>
+    </linearGradient>
+    <linearGradient id="fur" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.5" stop-color="#eef8f7"/>
+      <stop offset="1" stop-color="#ccd7dc"/>
+    </linearGradient>
+    <linearGradient id="hoodFur" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff4fb"/>
+      <stop offset="0.45" stop-color="#f2dde9"/>
+      <stop offset="1" stop-color="#bfcbd1"/>
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <filter id="tinyBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="0.55"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="54" fill="url(#nightGlow)"/>
+  <rect width="512" height="512" rx="54" fill="url(#pinkGlow)"/>
+  <path d="M0 359c86-18 160-18 228-4 96 20 177 6 284-24v181H0V359z" fill="#b8d9df" opacity="0.28"/>
+  <ellipse cx="195" cy="404" rx="174" ry="34" fill="#72f5ff" opacity="0.34" filter="url(#tinyBlur)"/>
+  <ellipse cx="284" cy="436" rx="146" ry="28" fill="#ff63a9" opacity="0.26" filter="url(#tinyBlur)"/>
+
+  <g stroke="#fff" stroke-linecap="round" opacity="0.78">
+    <path d="M62 18l-8 28" stroke-width="1.2"/>
+    <path d="M118 68l-12 38" stroke-width="1.5"/>
+    <path d="M410 22l-10 33" stroke-width="1.2"/>
+    <path d="M451 112l-17 48" stroke-width="2"/>
+    <path d="M355 8l-9 31" stroke-width="1.1"/>
+    <path d="M72 196l-18 52" stroke-width="2.2"/>
+    <path d="M390 172l-12 42" stroke-width="1.4"/>
+    <path d="M470 264l-9 28" stroke-width="1.1"/>
+    <path d="M154 18l-8 24" stroke-width="1"/>
+    <path d="M320 78l-13 42" stroke-width="1.4"/>
+  </g>
+  <g fill="#fff" opacity="0.78">
+    <circle cx="48" cy="142" r="6"/>
+    <circle cx="444" cy="90" r="4"/>
+    <circle cx="374" cy="305" r="3"/>
+    <circle cx="186" cy="373" r="3.4"/>
+    <circle cx="329" cy="392" r="2.8"/>
+    <circle cx="119" cy="302" r="3"/>
+    <circle cx="239" cy="63" r="2.4"/>
+  </g>
+
+  <g filter="url(#softShadow)">
+    <path d="M164 137c-58 3-91 50-74 108 18 63 73 59 91 17 18-44 9-91-17-125z" fill="#f2d4e4"/>
+    <path d="M124 162c-29 16-39 61-25 91 12 25 37 19 49-11 14-35 5-64-24-80z" fill="#ff8fbd"/>
+    <path d="M350 137c58 3 91 50 74 108-18 63-73 59-91 17-18-44-9-91 17-125z" fill="#f2d4e4"/>
+    <path d="M390 162c29 16 39 61 25 91-12 25-37 19-49-11-14-35-5-64 24-80z" fill="#ff8fbd"/>
+
+    <path d="M147 286c8-95 48-147 110-147s102 52 110 147H147z" fill="url(#coat)"/>
+    <path d="M139 229c4-84 47-143 118-143s114 59 118 143c-28-32-67-50-118-50s-90 18-118 50z" fill="#ff90c0"/>
+    <path d="M158 231c9-75 46-121 99-121s90 46 99 121c-28-23-61-36-99-36s-71 13-99 36z" fill="url(#hoodFur)"/>
+
+    <circle cx="257" cy="218" r="75" fill="url(#fur)"/>
+    <path d="M185 224c6-47 31-76 72-76s66 29 72 76c-21-21-45-30-72-30s-51 9-72 30z" fill="#ffffff" opacity="0.55"/>
+    <path d="M182 253c21 39 54 58 75 58s54-19 75-58c-21 18-47 26-75 26s-54-8-75-26z" fill="#d9e5e5" opacity="0.28"/>
+
+    <ellipse cx="224" cy="221" rx="17" ry="25" fill="#1a1119"/>
+    <ellipse cx="290" cy="221" rx="17" ry="25" fill="#1a1119"/>
+    <circle cx="217" cy="211" r="5.5" fill="#fff"/>
+    <circle cx="283" cy="211" r="5.5" fill="#fff"/>
+    <circle cx="230" cy="232" r="3" fill="#8b4c65" opacity="0.8"/>
+    <circle cx="296" cy="232" r="3" fill="#8b4c65" opacity="0.8"/>
+
+    <path d="M245 246c5-7 19-7 24 0-4 8-20 8-24 0z" fill="#e779a6"/>
+    <path d="M257 254v16" fill="none" stroke="#554148" stroke-width="3" stroke-linecap="round"/>
+    <path d="M241 272c8 9 24 9 32 0" fill="none" stroke="#554148" stroke-width="3" stroke-linecap="round"/>
+    <path d="M204 254c-19-2-34-8-48-18" fill="none" stroke="#d9e5e5" stroke-width="2" opacity="0.7"/>
+    <path d="M204 266c-20 4-38 4-54 0" fill="none" stroke="#d9e5e5" stroke-width="2" opacity="0.7"/>
+    <path d="M310 254c19-2 34-8 48-18" fill="none" stroke="#d9e5e5" stroke-width="2" opacity="0.7"/>
+    <path d="M310 266c20 4 38 4 54 0" fill="none" stroke="#d9e5e5" stroke-width="2" opacity="0.7"/>
+
+    <path d="M148 282c-22 44-27 91-18 142h253c9-51 4-98-18-142-23 35-62 53-109 53s-86-18-108-53z" fill="url(#coat)"/>
+    <path d="M257 302v122" fill="none" stroke="#ffd8e7" stroke-width="8" stroke-linecap="round"/>
+    <path d="M257 302v122" fill="none" stroke="#b7467a" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+    <path d="M168 312c-37 8-63 37-63 73 0 29 18 44 43 34 31-13 41-67 20-107z" fill="#e85d99"/>
+    <path d="M346 312c37 8 63 37 63 73 0 29-18 44-43 34-31-13-41-67-20-107z" fill="#e85d99"/>
+    <circle cx="172" cy="349" r="17" fill="#f4d8e4"/>
+    <circle cx="342" cy="349" r="17" fill="#f4d8e4"/>
+    <circle cx="157" cy="355" r="7" fill="#fff" opacity="0.7"/>
+    <circle cx="327" cy="355" r="7" fill="#fff" opacity="0.7"/>
+    <path d="M204 424h34v42h-34z" fill="#d24d83"/>
+    <path d="M276 424h34v42h-34z" fill="#d24d83"/>
+    <ellipse cx="221" cy="467" rx="25" ry="11" fill="#4f2638" opacity="0.45"/>
+    <ellipse cx="293" cy="467" rx="25" ry="11" fill="#4f2638" opacity="0.45"/>
+
+    <path d="M142 215c4-70 50-132 115-132s111 62 115 132" fill="none" stroke="#f4d8e4" stroke-width="20" stroke-linecap="round"/>
+    <path d="M141 215c4-70 51-133 116-133s112 63 116 133" fill="none" stroke="#fff7fb" stroke-width="7" stroke-linecap="round" opacity="0.65"/>
+  </g>
+</svg>
