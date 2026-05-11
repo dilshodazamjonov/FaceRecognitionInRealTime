@@ -464,30 +464,30 @@ function deriveGuide(metrics) {
 
 function guidanceCopy(status, guide) {
   if (status === "multiple_faces") {
-    return "One face only.";
+    return "one";
   }
 
   if (status === "no_face") {
-    return "No face.";
+    return "";
   }
 
   if (guide === "too_far") {
-    return "Closer.";
+    return "closer";
   }
 
   if (guide === "too_close") {
-    return "Back a little.";
+    return "back";
   }
 
   if (guide === "off_center") {
-    return "Center up.";
+    return "center";
   }
 
   if (status === "unknown") {
-    return "Face found.";
+    return "seen";
   }
 
-  return "Hold still.";
+  return "";
 }
 
 function applyFaceGuide(result) {
@@ -531,18 +531,18 @@ function handleVerificationResult(result) {
   resetStability();
 
   if (status === "multiple_faces") {
-    setVerificationState("multiple_faces", "too many", guidance, "one face");
-    setStatusDock("Too Many Faces", "Keep one person in frame.");
+    setVerificationState("multiple_faces", "...", guidance, "one");
+    setStatusDock("One Face", "Keep one person in frame.");
     return;
   }
 
   if (status === "no_face") {
-    setVerificationState("no_face", "searching", guidance, "searching");
+    setVerificationState("no_face", "...", guidance, "...");
     setStatusDock("No Face", "No face detected.");
     return;
   }
 
-  setVerificationState("idle", "checking", guidance, "waiting");
+  setVerificationState("idle", "...", guidance, "...");
 }
 
 async function verifyCurrentFrame() {
@@ -558,14 +558,14 @@ async function verifyCurrentFrame() {
   if (!(await drawFrameToCanvas())) {
     if (now - state.lastFrameWaitNoticeAt > 1400) {
       state.lastFrameWaitNoticeAt = now;
-      setVerificationState("idle", "checking", "Waiting for camera frame.", "video");
+      setVerificationState("idle", "...", "", "live");
     }
     return;
   }
 
   state.lastVerifyStartedAt = now;
   state.isVerifying = true;
-  setVerificationState("idle", "checking", "Checking with backend.", "live");
+  setVerificationState("idle", "...", "", "live");
 
   try {
     const imageData = canvasToImageData(elements.canvas);
@@ -590,7 +590,7 @@ async function verifyCurrentFrame() {
     hideFaceHintBox();
     setContinueEnabled(false);
     setStatusDock("Backend Error", errorMessage);
-    setVerificationState("idle", "waiting", "Retrying.", "waiting");
+    setVerificationState("idle", "...", "", "...");
   } finally {
     state.isVerifying = false;
   }
@@ -601,7 +601,7 @@ function startPolling() {
     return;
   }
 
-  setVerificationState("idle", "checking", "Scanning.", "live");
+  setVerificationState("idle", "...", "", "live");
   verifyCurrentFrame();
   state.pollTimer = window.setInterval(verifyCurrentFrame, VERIFY_INTERVAL_MS);
 }
@@ -666,8 +666,8 @@ async function startCamera() {
   setContinueEnabled(false);
   resetStability();
   hideFaceHintBox();
-  setVerificationState("idle", "checking", "Opening.", "opening");
-  setStatusDock("Connecting", "Connecting to backend.", { force: true });
+  setVerificationState("idle", "...", "", "...");
+  setStatusDock("Connecting", "Opening.", { force: true });
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     setVerificationState("idle", "blocked", "No camera.", "blocked");

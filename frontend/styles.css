@@ -497,35 +497,37 @@ h1 {
 .star-field::before {
   background-image:
     radial-gradient(circle, rgba(255, 255, 255, 0.86) 0 1px, transparent 1.6px),
-    radial-gradient(circle, rgba(126, 231, 255, 0.62) 0 1px, transparent 1.7px);
-  background-position: 18px 22px, 92px 76px;
-  background-size: 126px 126px, 184px 184px;
-  opacity: 0.46;
+    radial-gradient(circle, rgba(126, 231, 255, 0.62) 0 1px, transparent 1.7px),
+    radial-gradient(circle, rgba(255, 126, 182, 0.44) 0 1px, transparent 1.6px);
+  background-position: 18px 22px, 92px 76px, 46px 118px;
+  background-size: 86px 86px, 128px 128px, 164px 164px;
+  opacity: 0.58;
 }
 
 .star-field::after {
   background-image:
     radial-gradient(circle, rgba(255, 126, 182, 0.72) 0 1px, transparent 1.8px),
-    radial-gradient(circle, rgba(255, 255, 255, 0.55) 0 1px, transparent 1.6px);
-  background-position: 54px 38px, 126px 148px;
-  background-size: 210px 210px, 156px 156px;
-  opacity: 0.32;
+    radial-gradient(circle, rgba(255, 255, 255, 0.55) 0 1px, transparent 1.6px),
+    radial-gradient(circle, rgba(126, 231, 255, 0.42) 0 1px, transparent 1.6px);
+  background-position: 54px 38px, 126px 148px, 8px 86px;
+  background-size: 150px 150px, 112px 112px, 190px 190px;
+  opacity: 0.42;
   animation: star-drift 18s linear infinite;
 }
 
 .star-layer-a {
   background-image: radial-gradient(circle, rgba(255, 255, 255, 0.64) 0 1px, transparent 1.8px);
-  background-size: 92px 92px;
+  background-size: 64px 64px;
   background-position: 12px 40px;
-  opacity: 0.28;
+  opacity: 0.36;
   animation: sparkle-drift 11s ease-in-out infinite alternate;
 }
 
 .star-layer-b {
   background-image: radial-gradient(circle, rgba(126, 231, 255, 0.52) 0 1px, transparent 1.8px);
-  background-size: 144px 144px;
+  background-size: 96px 96px;
   background-position: 86px 8px;
-  opacity: 0.24;
+  opacity: 0.34;
   animation: sparkle-drift 15s ease-in-out infinite alternate-reverse;
 }
 
@@ -565,7 +567,8 @@ h1 {
     0 0 26px rgba(255, 126, 182, 0.22);
   opacity: 0;
   transform: rotate(-34deg);
-  animation: falling-star-pass 12s linear infinite;
+  animation: falling-star-pass 24s linear infinite;
+  animation-delay: -7s;
 }
 
 .falling-star::after {
@@ -583,16 +586,96 @@ h1 {
 
 .falling-star-b {
   width: 64px;
-  animation-delay: 3.5s;
-  animation-duration: 15s;
+  animation-delay: -2s;
+  animation-duration: 29s;
   opacity: 0;
 }
 
 .falling-star-c {
   width: 104px;
-  animation-delay: 7s;
-  animation-duration: 18s;
+  animation-delay: 4s;
+  animation-duration: 34s;
   opacity: 0;
+}
+
+.falling-star-d {
+  top: -18vh;
+  right: 18vw;
+  width: 72px;
+  animation-delay: 9s;
+  animation-duration: 31s;
+  opacity: 0;
+}
+
+.falling-star-e {
+  top: 2vh;
+  right: -16vw;
+  width: 52px;
+  animation-delay: 13s;
+  animation-duration: 37s;
+  opacity: 0;
+}
+
+.falling-star-f {
+  top: -24vh;
+  right: 38vw;
+  width: 92px;
+  animation-delay: 17s;
+  animation-duration: 41s;
+  opacity: 0;
+}
+
+.love-star {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  opacity: 0.52;
+  filter: drop-shadow(0 0 12px rgba(255, 126, 182, 0.48));
+  animation: love-float 9s ease-in-out infinite alternate;
+}
+
+.love-star::before,
+.love-star::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 12px;
+  border-radius: 999px 999px 0 0;
+  background: rgba(255, 126, 182, 0.68);
+  transform-origin: 50% 100%;
+}
+
+.love-star::before {
+  left: 5px;
+  transform: rotate(-45deg);
+}
+
+.love-star::after {
+  left: 1px;
+  transform: rotate(45deg);
+}
+
+.love-star-a {
+  left: 18%;
+  top: 24%;
+}
+
+.love-star-b {
+  right: 18%;
+  top: 62%;
+  width: 10px;
+  height: 10px;
+  opacity: 0.4;
+  animation-delay: 2s;
+}
+
+.love-star-c {
+  left: 72%;
+  top: 16%;
+  width: 12px;
+  height: 12px;
+  opacity: 0.36;
+  animation-delay: 4s;
 }
 
 .sprig {
@@ -1383,6 +1466,15 @@ h1 {
   }
 }
 
+@keyframes love-float {
+  from {
+    transform: translate3d(0, 0, 0) rotate(-4deg) scale(0.9);
+  }
+  to {
+    transform: translate3d(8px, -14px, 0) rotate(6deg) scale(1.08);
+  }
+}
+
 @keyframes sky-open {
   0% {
     opacity: 0;
@@ -1461,6 +1553,7 @@ h1 {
   .star-field::after,
   .star-layer,
   .falling-star,
+  .love-star,
   .comet {
     animation: none !important;
   }
