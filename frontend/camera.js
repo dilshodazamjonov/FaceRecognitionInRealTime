@@ -522,8 +522,10 @@ function handleVerificationResult(result) {
   }
 
   if (status === "unknown") {
-    hideFaceHintBox();
-    unlockContinue("face found");
+    setContinueEnabled(false);
+    resetStability();
+    setVerificationState("idle", "...", guidance, "seen");
+    setStatusDock("Not Passed", "Face detected, but it did not match.");
     return;
   }
 
